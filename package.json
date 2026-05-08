@@ -1,0 +1,36 @@
+{
+  "name": "lumebotv4.1",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "canvacord": "^6.0.4",
+    "chalk": "^4.1.2",
+    "cheerio": "^1.0.0",
+    "discord-arts": "^0.6.2",
+    "discord-html-transcripts": "^3.2.0",
+    "discord-pagination-advanced": "^1.1.9",
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5",
+    "erela.js": "^2.3.3",
+    "erela.js-apple": "^1.2.6",
+    "erela.js-deezer": "^1.0.7",
+    "erela.js-facebook": "^1.0.3",
+    "erela.js-spotify": "^1.2.0",
+    "lumebotv4.1": "file:",
+    "megadb": "^3.4.1",
+    "moment": "^2.30.1",
+    "moment-duration-format": "^2.3.2",
+    "mongoose": "^6.13.0",
+    "node-fetch": "^3.3.2",
+    "simply-xp": "^1.3.8",
+    "systeminformation": "^5.31.5"
+  }
+}
