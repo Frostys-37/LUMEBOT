@@ -27,7 +27,7 @@ module.exports = class Logger {
 		case "ready": {
 			return console.log(`[${chalk.gray(date)}]: [${chalk.black.bgBlueBright(type.toUpperCase())}] ${content}`);
 		} 
-		default: throw new TypeError("Logger type must be either warn, debug, log, ready, cmd or error.");
+		default: throw new TypeError("El logger debe ser un aviso, debug, log, ready, cmd o error.");
 		}
 	}
 };

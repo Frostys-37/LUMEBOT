@@ -7,5 +7,5 @@ module.exports = (client) => {
         client.on(event.name, (...args) => event.run(client, ...args));
         count++;
     });
-    client.logger.log(`Client Events Loaded ${count}`, "event");
+    client.logger.log(`Eventos cargados: ${count}`, "event");
 }

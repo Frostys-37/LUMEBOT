@@ -1,79 +1,77 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, CommandInteraction, ButtonStyle, Client, StringSelectMenuBuilder, ComponentType } = require("discord.js");
-const Discord = require("discord.js");
-const { stat } = require("fs");
-const { initial } = require("lodash");
-const page = require('discord-pagination-advanced');
+const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ComponentType, MessageFlags } = require("discord.js");
+const emojis = require("../../emojis.json");
 
 module.exports = {
     name: "help",
-    description: "Mira todos mis comandos disponibles!.",
-    owner: false,
-	category: "Information",
+    description: "Muestra la lista de comandos y su modo de uso.",
+    category: "Information",
 
-    /**
-     * @param {Client} client
-     * @param {CommandInteraction} interaction
-     */
+    run: async (client, interaction) => {
+        await interaction.deferReply();
 
-    run: async (client, interaction, prefix) => {
-        await interaction.deferReply({
-            ephemeral: true
-          });
+        const categories = [...new Set(client.slashCommands.map(cmd => cmd.category || "General"))];
 
-    const embed = new EmbedBuilder()
-      .setTitle(`${client.user.username} Help`)
-      .setDescription(`Hola **<@${interaction.member.user.id}>**, soy <@${client.user.id}>!\n\nBot oficial de este servidor, mis categorías son las siguientes:\n\n\`🎵\`•Musica\n\`🗒️\`•Información\n\`💽\`•Playlists\n\`⚙️\`•Config\n\`🛠\`•Moderación\n\`📐\`•Utilidad\n\n*Para ver los comandos, elije el botón correspondiente.*\n\n`)
-      .setThumbnail(client.user.displayAvatarURL())
-      .setColor(client.embedColor)
-      .setTimestamp()
-      .setFooter({ text: `Requested by: ${interaction.member.user.username}`, iconURL: interaction.member.user.displayAvatarURL({ dynamic: true})})
+        const embedPrincipal = new EmbedBuilder()
+            .setTitle(`${emojis.user || "📂"} | Panel de Ayuda de Lumecraft`)
+            .setDescription("Selecciona una categoría en el menú para ver los comandos y cómo usarlos correctamente.")
+            .setColor(client.embedColor || "Blue")
+            .setThumbnail(client.user.displayAvatarURL())
+            .setFooter({ text: "Lumecraft Network - Help" });
 
-      const row = new ActionRowBuilder()
-			.addComponents(
-				new Discord.SelectMenuBuilder()
-					.setCustomId('helped')
-					.setPlaceholder('Mira mis comandos seleccionando la categoría')
-					.addOptions(
-						{
-							label: 'Configuración',
-							description: 'Mira mis comandos de configuración',
-							value: 'config',
-              emoji: '852098683851505675',
-						},
-						{
-							label: 'Información',
-							description: 'Mira mis comandos de información',
-							value: 'info',
-              emoji: '931701885755326484',
-						},
-            {
-							label: 'Moderación',
-							description: 'Mira mis comandos de Moderación (uso solo staff)',
-							value: 'mod',
-              emoji: '1010909196771917894',
-						},
-            {
-							label: 'Música',
-							description: 'Mira mis comandos de música',
-							value: 'music',
-              emoji: '1074881604075393044',
-						},
-            {
-							label: 'Playlist',
-							description: 'Aprende a crear tu playlist',
-							value: 'plays',
-              emoji: '852093497837879296',
-						},
-            {
-							label: 'Utilidad',
-							description: 'Mira mis comandos de utilidad',
-							value: 'util',
-              emoji: '850651217343545344',
-						},
-					),
-			);
+        const menu = new StringSelectMenuBuilder()
+            .setCustomId("help-menu")
+            .setPlaceholder("Selecciona una categoría")
+            .addOptions(
+                categories.map(cat => ({
+                    label: `${cat}`,
+                    value: `${cat}`,
+                    emoji: getCategoryEmoji(cat)
+                }))
+            );
 
-      await interaction.editReply({embeds: [embed], components: [row]})
+        const row = new ActionRowBuilder().addComponents(menu);
 
+        const response = await interaction.editReply({
+            embeds: [embedPrincipal],
+            components: [row]
+        });
+
+        const collector = response.createMessageComponentCollector({
+            componentType: ComponentType.StringSelect,
+            time: 60000
+        });
+
+        collector.on("collect", async i => {
+            if (i.user.id !== interaction.user.id) return i.reply({ content: "Usa tu propio comando.", flags: [MessageFlags.Ephemeral] });
+
+            const categoryName = i.values[0];
+            const cmds = client.slashCommands.filter(cmd => cmd.category === categoryName);
+
+            const embedCategory = new EmbedBuilder()
+                .setTitle(`${getCategoryEmoji(categoryName)} | Categoría: ${categoryName}`)
+                .setColor(client.embedColor || "Blue")
+                .setDescription("Si un comando tiene [], significa que el argumento es opcional.\nSi tiene <>, el argumento es obligatorio.\n\n" +
+                    cmds.map(cmd => {
+                        const usage = cmd.usage ? `\`${cmd.usage}\`` : `\`/${cmd.name}\``;
+                        return `**/${cmd.name}**\n> ${cmd.description || "Sin descripción"}\n> **Uso:** ${usage}`;
+                    }).join("\n\n")
+                );
+
+            await i.update({ embeds: [embedCategory] });
+        });
+
+        collector.on("end", () => {
+            interaction.editReply({ components: [] }).catch(() => {});
+        });
     }
+};
+
+function getCategoryEmoji(category) {
+    const categories = {
+        "Config": "⚙️",
+        "Information": "ℹ️",
+        "Staff": "🛡️",
+        "Utility": "🔧"
+    };
+    return categories[category] || "📁";
 }

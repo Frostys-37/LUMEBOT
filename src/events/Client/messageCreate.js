@@ -1,8 +1,6 @@
 const { EmbedBuilder, Message, Client, PermissionsBitField } = require("discord.js");
-const db = require("../../schema/prefix.js");
-const db2 = require("../../schema/dj");
-const db3 = require("../../schema/setup");
 let xp = require("simply-xp")
+const config = require("../../config.js")
 
 module.exports = {
     name: "messageCreate",
@@ -20,17 +18,13 @@ module.exports = {
         const random = Math.floor(Math.random() * 149) + 1
         xp.addXP(message, message.author.id, message.guild.id, random)
 
-        let prefix = client.prefix;
-        const ress = await db.findOne({ Guild: message.guildId })
-        if (ress && ress.Prefix) prefix = ress.Prefix;
-        let data = await db3.findOne({ Guild: message.guildId });
-        if (data && data.Channel && message.channelId === data.Channel) return client.emit("setupSystem", message);
-
+        const prefix = "/";
+       
         const mention = new RegExp(`^<@!?${client.user.id}>( |)$`);
         if (message.content.match(mention)) {
             const embed = new EmbedBuilder()
                 .setColor(client.embedColor)
-                .setDescription(`**› Mi prefix es: \`${prefix}\`**\n**›. Puedes ver todos mis comandos así: \`${prefix}\`help**`);
+                .setDescription(`**› Mi prefix es: /**\n**›. Puedes ver todos mis comandos usando: /help**`);
             message.channel.send({ embeds: [embed] })
         };
         const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -52,16 +46,16 @@ module.exports = {
 
         if (!message.guild.members.me.permissions.has(PermissionsBitField.resolve('ViewChannel'))) return;
 
-        if (!message.guild.members.me.permissions.has(PermissionsBitField.resolve('EmbedLinks'))) return await message.channel.send({ content: `No tengo el permiso**\`EMBED_LINKS\`** en <#${message.channelId}> para ejecutar este comando: **\`${command.name}\`**.` }).catch(() => { });
+        if (!message.guild.members.me.permissions.has(PermissionsBitField.resolve('EmbedLinks'))) return await message.channel.send({ content: `No tengo el permiso: **\`EMBED_LINKS\`** en <#${message.channelId}> para ejecutar este comando: **\`${command.name}\`**.` }).catch(() => { });
 
         const embed = new EmbedBuilder()
             .setColor('Blurple')
 
         if (command.args && !args.length) {
-            let reply = `No has proveido ningún argumento, ${message.author}!`;
+            let reply = `No has dado ningún argumento, ${message.author}!`;
 
             if (command.usage) {
-                reply += `\nUsa: \`${prefix}${command.name} ${command.usage}\``;
+                reply += `\nUsa: /${command.name} ${command.usage}\``;
             }
 
             embed.setDescription(reply);
@@ -106,25 +100,9 @@ module.exports = {
                 }
             }
         }
-        if (command.dj) {
-            let data = await db2.findOne({ Guild: message.guild.id })
-            let perm = 'MuteMembers';
-            if (data) {
-                if (data.Mode) {
-                    let pass = false;
-                    if (data.Roles.length > 0) {
-                        message.member.roles.cache.forEach((x) => {
-                            let role = data.Roles.find((r) => r === x.id);
-                            if (role) pass = true;
-                        });
-                    };
-                    if (!pass && !message.member.permissions.has(perm)) return message.channel.send({ embeds: [embed.setDescription(`No tienes los permisos/rol dj para usar este comando.`)] })
-                };
-            };
-        }
 
         try {
-            command.execute(message, args, client, prefix);
+            command.execute(message, args, client);
         } catch (error) {
             console.log(error);
             embed.setDescription("Ha ocurrido un error con este comando.\nHe contactado con mi dev para solucionarlo!.");

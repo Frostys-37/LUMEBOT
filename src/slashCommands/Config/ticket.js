@@ -1,6 +1,7 @@
-const { ApplicationCommandOptionType, CommandInteraction, ButtonStyle } = require("discord.js")
+const { ApplicationCommandOptionType, CommandInteraction, ButtonStyle, MessageFlags } = require("discord.js")
 const Discord = require("discord.js")
 const ms = require("ms")
+const config = require("../../config.js")
 const emojis = require("./../../emojis.json")
 module.exports = {
     name: "ticket",
@@ -15,16 +16,14 @@ module.exports = {
      */
   
     run: async (client, interaction) => {
-        await interaction.deferReply({
-            ephemeral: false
-          });
+        console.log("Color cargado", config.embedColor)
 
           const embed = new Discord.EmbedBuilder()
-          .setTitle("Sistema de Tickets | Lumecraft")
-          .setDescription("Presiona el botón para abrir un ticket, donde el staff correspondiente te atenderá")
-          .setFooter({ text: "Sistema de Tickets", iconURL: client.user.avatarURL() })
+          .setTitle(emojis.channel + " | Sistema de Tickets - Lumecraft")
+          .setDescription("Presiona el botón para abrir un ticket, donde el staff te atenderá directamente.")
+          .setFooter({ text: "Sistema de Tickets | mc.lumecraft.net", iconURL: client.user.avatarURL() })
           .setTimestamp()
-          .setColor(client.embedColor)
+          .setColor(config.embedColor);
 
           const row = new Discord.ActionRowBuilder()
           .addComponents(
@@ -33,9 +32,12 @@ module.exports = {
             .setLabel('Tickets')
             .setStyle(ButtonStyle.Primary)
             .setEmoji("804025152316243968")
-          )
+          );
 
-          await interaction.editReply({ embeds: [embed], components: [row] });
+          await interaction.deferReply({content: "Sistema de Tickets cargado.", flags: [MessageFlags.Ephemeral]})
+          await client.channels.cache.get("742521948558589983").send({ embeds: [embed], components: [row] }).catch((error) => {
+            console.error(error);
+          });
 
         }
     }

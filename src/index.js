@@ -17,7 +17,7 @@ process.on('uncaughtExceptionMonitor', (err, origin) => {
 });
 
 client.on('interactionCreate', async (interaction) => {
-    if(!interaction.isSelectMenu());
+    if(!interaction.isStringSelectMenu());
     let _commands;
     let editEmbed = new Discord.EmbedBuilder();
 
@@ -63,7 +63,6 @@ client.on('interactionCreate', async (interaction) => {
 
 
 });
-
 
 
 module.exports = client;

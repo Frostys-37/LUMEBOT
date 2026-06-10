@@ -3,10 +3,12 @@ const {
   version,
   CommandInteraction,
   Client,
+  MessageFlags,
 } = require("discord.js");
 const moment = require("moment");
 require("moment-duration-format");
-const os = require("os");
+const os = require("os")
+const emojis = require("../../emojis.json");
 const si = require("systeminformation");
 
 module.exports = {
@@ -15,7 +17,7 @@ module.exports = {
   description: "Mira el status del bot.",
   run: async (client, interaction) => {
     await interaction.deferReply({
-      ephemeral: false,
+      flags: [MessageFlags.Ephemeral]
     });
 
     const duration1 = moment
@@ -32,7 +34,7 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setColor(interaction.client.embedColor)
       .setThumbnail(interaction.client.user.displayAvatarURL())
-      .setDescription(`${about} **Status**
+      .setDescription(`${emojis.bot} **Status**
                 **= ESTADISTICAS =**
                 **• Servers** : ${guildsCounts.size}
                   **• Usuarios** : ${userCounts}
@@ -47,22 +49,22 @@ module.exports = {
                 > **• Speed** : ${os.cpus()[0].speed} MHz
                 **• MEMORIA** :
                 > **• Total Memory** : ${(os.totalmem() / 1024 / 1024).toFixed(
-                  2
-                )}mb
+        2
+      )}mb
                 > **• Free Memory** : ${(os.freemem() / 1024 / 1024).toFixed(
-                  2
-                )}mb
+        2
+      )}mb
                 > **• Total** : ${(
-                  process.memoryUsage().heapTotal /
-                  1024 /
-                  1024
-                ).toFixed(2)}mb
+          process.memoryUsage().heapTotal /
+          1024 /
+          1024
+        ).toFixed(2)}mb
                 > **• Usada** : ${(
-                  process.memoryUsage().heapUsed /
-                  1024 /
-                  1024
-                ).toFixed(2)}mb
+          process.memoryUsage().heapUsed /
+          1024 /
+          1024
+        ).toFixed(2)}mb
             `);
-    interaction.followUp({ embeds: [embed] });
+    interaction.followUp({ embeds: [embed], flags: [MessageFlags.Ephemeral] });
   },
 };
