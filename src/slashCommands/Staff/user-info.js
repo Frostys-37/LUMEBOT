@@ -66,13 +66,6 @@ module.exports = {
                 embed.addFields({ name: `${emojis.warn || "⚠️"} Últimos Warns`, value: ultimosWarns });
             }
 
-            if (sancionesData.length > 0) {
-                const ultimasSanciones = sancionesData.slice(-3).reverse()
-                    .map((s) => `• **${s.staffAction}:** ${s.reason} (ID: #${s.reportId})`)
-                    .join("\n");
-                embed.addFields({ name: `${emojis.report || "📝"} Últimas Sanciones (MC)`, value: ultimasSanciones });
-            }
-
             if (member) {
                 embed.addFields({ 
                     name: `${emojis.rol || "🏷️"} Roles [${member.roles.cache.size - 1}]`, 

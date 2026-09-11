@@ -95,7 +95,7 @@ const {
         .setTimestamp(Date.now())
         .setColor("Blurple")
 
-        client.channels.cache.get("959908411376566312").send({ content: `${member}`, embeds: [embed_servidor], files: [attach] })
+        client.channels.cache.get("739130797407207525").send({ content: `${member}`, embeds: [embed_servidor], files: [attach] })
         member.user.send({ embeds: [embed_md] })
         await member.roles.add("742524571118207088")
     } 

@@ -10,7 +10,7 @@ module.exports = {
   run: async (client, interaction) => {
     const msg = await interaction.deferReply({ fetchReply: true });
 
-    const ipServidor = "mc.lumecraft.com"; 
+    const ipServidor = "mc.lumecraft.net"; 
 
     let mcStatus = "Desconocido";
     let playersInfo = "0/0";
