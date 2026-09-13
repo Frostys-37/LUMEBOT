@@ -29,5 +29,13 @@
     "ms": "^2.1.3",
     "simply-xp": "^1.3.8",
     "systeminformation": "^5.31.6"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Frostys-37/LUMEBOT.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Frostys-37/LUMEBOT/issues"
+  },
+  "homepage": "https://github.com/Frostys-37/LUMEBOT#readme"
 }
