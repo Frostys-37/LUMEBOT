@@ -163,16 +163,20 @@ module.exports = {
         let ch = interaction.channel;
         if (!ch) return;
 
-        const member = await client.users.fetch(ch.topic);
-        await interaction.channel.setParent(
-          `${client.config.ticketOpenCategoryId}`,
-        );
+        const member = await client.users.fetch(ch.topic).catch(() => null);
+        if (!member) {
+          return interaction.editReply({
+            content: "No se pudo identificar al dueño original del ticket.",
+          });
+        }
 
+        await interaction.channel.setParent(client.config.ticketOpenCategoryId);
         await ch.setName(`reopen-${member.username}`);
-        await ch.permissionOverwrites.edit(interaction.user.id, {
+        await ch.permissionOverwrites.edit(member.id, {
           ViewChannel: true,
           SendMessages: true,
         });
+
         interaction.editReply({
           content: "Ticket reabierto",
           flags: [MessageFlags.Ephemeral],
