@@ -57,28 +57,21 @@ module.exports = {
         .create({
           name: `ticket-${interaction.user.username}`,
           type: ChannelType.GuildText,
-          parent: "808447258609057823",
+          parent: client.config.ticketOpenCategoryId,
           permissionOverwrites: [
             {
               id: interaction.guild.id,
               deny: [PermissionsBitField.Flags.ViewChannel],
             },
-            {
-              id: "740295855726133328",
+
+            ...client.config.ticketStaffRoleIds.map((roleId) => ({
+              id: roleId,
               allow: [
                 PermissionsBitField.Flags.ViewChannel,
                 PermissionsBitField.Flags.SendMessages,
                 PermissionsBitField.Flags.ReadMessageHistory,
               ],
-            },
-            {
-              id: "740295965055123516",
-              allow: [
-                PermissionsBitField.Flags.ViewChannel,
-                PermissionsBitField.Flags.SendMessages,
-                PermissionsBitField.Flags.ReadMessageHistory,
-              ],
-            },
+            })),
             {
               id: interaction.user.id,
               allow: [
@@ -151,7 +144,9 @@ module.exports = {
         if (!ch) return;
 
         const member = await client.users.fetch(ch.topic);
-        await interaction.channel.setParent("847664236158517288");
+        await interaction.channel.setParent(
+          client.config.ticketClosedCategoryId,
+        );
 
         await ch.permissionOverwrites.edit(member.id, { ViewChannel: false });
 
@@ -169,7 +164,9 @@ module.exports = {
         if (!ch) return;
 
         const member = await client.users.fetch(ch.topic);
-        interaction.channel.setParent("808447258609057823");
+        await interaction.channel.setParent(
+          `${client.config.ticketOpenCategoryId}`,
+        );
 
         await ch.setName(`reopen-${member.username}`);
         await ch.permissionOverwrites.edit(interaction.user.id, {
@@ -197,13 +194,13 @@ module.exports = {
           useCDN: true,
         });
 
-        client.channels.fetch("1074860381467578499")
+        client.channels
+          .fetch(client.config.ticketTranscriptChannelId)
           .then((channel) => {
             channel.send({ files: [attachment] });
           });
 
-          interaction.channel.delete();
-
+        interaction.channel.delete();
       }
     }
   },

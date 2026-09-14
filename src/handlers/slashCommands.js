@@ -40,11 +40,12 @@ module.exports = (client) => {
     }
   });
   client.logger.log(`SlashCommands cargados (/): ${count}`, "cmd");
+  console.log('CLIENT_ID en uso:', client.config.clientID);
   const rest = new REST({ version: "10" }).setToken(client.config.token);
   (async () => {
     try {
 
-      const servidores = ["738909505861058580", "793492909189365761"]
+      const servidores = ["793492909189365761"];
       
       for (const servidor of servidores) {
         await rest.put(Routes.applicationGuildCommands(client.config.clientID, servidor), {

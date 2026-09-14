@@ -1,5 +1,6 @@
 const { ApplicationCommandOptionType, EmbedBuilder, MessageFlags } = require(`discord.js`);
 const Reporte = require("../../schema/reports");
+const emojis = require("../../emojis.json")
 
 module.exports = {
     name: "accion",
@@ -47,7 +48,7 @@ module.exports = {
             )
             .setTimestamp();
 
-        const logChannel = await client.channels.fetch("793949145986760785");
+        const logChannel = await client.channels.fetch(client.config.sanctionLogChannelId);
         await logChannel.send({ embeds: [embedSancion] });
 
         const user = await client.users.fetch(data.userId).catch(() => null);

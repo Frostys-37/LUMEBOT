@@ -1,72 +1,44 @@
-const { ApplicationCommandOptionType, MessageFlags } = require(`discord.js`)
-const Discord = require(`discord.js`)
-const emojis = require("../../emojis.json")
+const { ApplicationCommandOptionType, MessageFlags } = require("discord.js");
+const msg = require("../../utils/messages");
+const { validateModerationTarget, buildModLogEmbed, sendModLog } = require("../../utils/moderation");
+
 module.exports = {
-    name: `kick`,
-    category: "Staff",
-    usage: "/kick <usuario> <reason>",
-    description: `Expulsa a un usuario del servidor.`,
-    userPrems: [`BanMembers`],
-    options: [
-        {
-            name: `usuario`,
-            description: `Menciona a un usuario del servidor.`,
-            type: ApplicationCommandOptionType.User,
-            required: true
+  name: "kick",
+  category: "Staff",
+  usage: "/kick <usuario> <reason>",
+  description: "Expulsa a un usuario del servidor.",
+  userPrems: ["BanMembers"],
+  botPerms: ["KickMembers"],
+  options: [
+    { name: "usuario", description: "Menciona a un usuario del servidor.", type: ApplicationCommandOptionType.User, required: true },
+    { name: "reason", description: "Coloca una razón para banear al usuario.", type: ApplicationCommandOptionType.String, required: true },
+  ],
 
-        },
-        {
-            name: `reason`,
-            description: `Coloca una razón para banear al usuario.`,
-            type: ApplicationCommandOptionType.String,
-            required: true
-        }
-    ],
+  run: async (client, interaction) => {
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
-    /**
-     *
-     * @param {LUMEBOT} client
-     * @param {CommandInteraction} interaction
-     */
+    const target = interaction.options.getUser("usuario");
+    const reason = interaction.options.getString("reason");
+    const member = await interaction.guild.members.fetch(target.id).catch(() => null);
 
-    run: async (client, interaction) => {
-        await interaction.deferReply({
-            flags: [MessageFlags.Ephemeral]
-        });
+    if (!member) return interaction.editReply({ content: msg.error("user_left_guild") });
 
-        const target = interaction.options.getUser("usuario")
-        if (!target) return interaction.reply({ content: "No has mencionado a un usuario.", flags: [MessageFlags.Ephemeral] })
+    const error = validateModerationTarget(client, interaction, member);
+    if (error) return interaction.editReply({ content: error });
 
-        const reason = interaction.options.getString("reason")
-        if (!reason) return interaction.reply({ content: "La razón es requerida.", flags: [MessageFlags.Ephemeral] })
+    await member.kick(reason);
 
-        const member = await interaction.guild.members.fetch(target.id)
+    const embed = buildModLogEmbed({
+      client,
+      interaction,
+      actionTitle: "Usuario Expulsado",
+      emojiKey: "kick",
+      target,
+      reason,
+      footerText: msg.success("kicked"),
+    });
 
-        if (member.roles.highest.position >= interaction.member.roles.highest.position)
-            return interaction.reply({ content: "El usuario tiene un rol mas alto que el tuyo.", flags: [MessageFlags.Ephemeral] });
-
-        if (target.id === client.config.ownerID) return interaction.reply({ content: "No puedes expulsar a mi desarrollador.", flags: [MessageFlags.Ephemeral] })
-
-        if (!interaction.guild.members.me.permissions.has(PermissionFlagsBits.ModerateMembers))
-            return interaction.reply({ content: "No tengo permisos para moderar el servidor.", flags: [MessageFlags.Ephemeral] });
-
-        await interaction.guild.members.kick(target, { reason: reason })
-
-        const banembed = new Discord.EmbedBuilder()
-            .setTitle(`${emojis.kick} | Usuario Expulsado`)
-            .addFields(
-                { name: `${emojis.user} | Usuario:`, value: `${target} | ${target.id}` },
-                { name: `${emojis.moder} | Moderador:`, value: `[${interaction.member.roles.highest}] ${interaction.user.tag} | ${interaction.user.id}` },
-                { name: `${emojis.razon} | Razón:`, value: `${reason}` },
-                { name: `${emojis.channel} | Comando ejecutado en:`, value: `${interaction.channel.name}` }
-            )
-            .setColor(client.embedColor)
-            .setTimestamp(Date.now())
-            .setFooter({ text: 'Usuario Expulsado del Servidor' }, client.user.avatarURL())
-
-        await interaction.editReply({ embeds: [banembed] })
-        client.channels.fetch('1074861661665636352').then(channel => {
-            channel.send({ embeds: [banembed] })
-        })    
-    }
-}
+    await interaction.editReply({ embeds: [embed] });
+    await sendModLog(client, embed);
+  },
+};

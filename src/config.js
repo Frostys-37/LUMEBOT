@@ -1,33 +1,43 @@
 require("dotenv").config();
-const required = ['TOKEN', 'MONGO_URI', 'CLIENT_ID'];
+
+const required = ["TOKEN", "MONGO_URI", "CLIENT_ID"];
 for (const key of required) {
   if (!process.env[key]) throw new Error(`Falta variable de entorno: ${key}`);
 }
 
-module.exports = {
-    token: process.env.TOKEN,
-    mongourl: process.env.MONGO_URI,
-    clientID: process.env.CLIENT_ID,
-    prefix: "/",
-    ownerID: process.env.devID || "793926625765883955",
-    embedColor: "Blurple", 
-    logs: process.env.LOGS || "1065322630980321422",
-    links: {
-        img: process.env.IMG || "https://images-ext-1.discordapp.net/external/Ro-4EvLm5w8bDgvVbA6f2P0lqJEclpw_ra42F5lusm0/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/913869512279994369/8363d8ff10be7551255d4168634de973.png?width=584&height=584",
-        support: process.env.SUPPORT || 'https://discord.gg/9zzcvRqb3A',
-        invite: process.env.INVITE || 'https://discord.com/api/oauth2/authorize?client_id=920126102305902612&permissions=8&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fapi%2Fcallback&response_type=code&scope=bot%20applications.commands.permissions.update'
-    }
-}
+const parseList = (value) => (value ? value.split(",").map((v) => v.trim()).filter(Boolean) : []);
 
-function parseBoolean(value) {
-    if (typeof value === 'string') {
-        value = value.trim().toLowerCase();
-    }
-    switch (value) {
-        case true:
-        case 'true':
-            return true;
-        default:
-            return false;
-    }
-}
+module.exports = {
+  token: process.env.TOKEN,
+  mongourl: process.env.MONGO_URI,
+  clientID: process.env.CLIENT_ID,
+  prefix: "/",
+  ownerID: process.env.OWNER_ID,
+  embedColor: process.env.EMBED_COLOR || "Blurple",
+  logs: process.env.LOGS || "1065322630980321422",
+
+  guildIds: parseList(process.env.GUILD_IDS),
+
+  modLogChannelId: process.env.MOD_LOG_CHANNEL_ID,
+  sanctionLogChannelId: process.env.SANCTION_LOG_CHANNEL_ID,
+  reportStaffChannelId: process.env.REPORT_STAFF_CHANNEL_ID,
+  suggestionsChannelId: process.env.SUGGESTIONS_CHANNEL_ID,
+  videoStaffChannelId: process.env.VIDEO_STAFF_CHANNEL_ID,
+  videoPublicChannelId: process.env.VIDEO_PUBLIC_CHANNEL_ID,
+  welcomeChannelId: process.env.WELCOME_CHANNEL_ID,
+  memberRoleId: process.env.MEMBER_ROLE_ID,
+
+  ticketPanelChannelId: process.env.TICKET_PANEL_CHANNEL_ID,
+  ticketOpenCategoryId: process.env.TICKET_OPEN_CATEGORY_ID,
+  ticketClosedCategoryId: process.env.TICKET_CLOSED_CATEGORY_ID,
+  ticketTranscriptChannelId: process.env.TICKET_TRANSCRIPT_CHANNEL_ID,
+  ticketStaffRoleIds: parseList(process.env.TICKET_STAFF_ROLE_IDS),
+
+  staffBypassIds: parseList(process.env.STAFF_BYPASS_IDS),
+
+  links: {
+    img: process.env.IMG || "",
+    support: process.env.SUPPORT || "https://discord.gg/9zzcvRqb3A",
+    invite: process.env.INVITE || "",
+  },
+};

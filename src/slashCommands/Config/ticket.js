@@ -35,7 +35,7 @@ module.exports = {
           );
 
           await interaction.deferReply({content: "Sistema de Tickets cargado.", flags: [MessageFlags.Ephemeral]})
-          await client.channels.cache.get("742521948558589983").send({ embeds: [embed], components: [row] }).catch((error) => {
+          await client.channels.cache.get(client.config.ticketPanelChannelId).send({ embeds: [embed], components: [row] }).catch((error) => {
             console.error(error);
           });
 

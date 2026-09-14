@@ -1,13 +1,5 @@
 const {
-    CommandInteraction,
-    InteractionType,
-    PermissionFlagsBits,
-    PermissionsBitField,
-    EmbedBuilder,
-    Message,
     GuildMember,
-    DiscordAPIError,
-    DiscordjsRangeError,
   } = require("discord.js");
   const Discord = require("discord.js")
   const LUMEBOT = require("../../structures/Client");
@@ -95,8 +87,8 @@ const {
         .setTimestamp(Date.now())
         .setColor("Blurple")
 
-        client.channels.cache.get("739130797407207525").send({ content: `${member}`, embeds: [embed_servidor], files: [attach] })
-        await member.roles.add("742524571118207088")
+        client.channels.cache.get(client.config.welcomeChannelId).send({ content: `${member}`, embeds: [embed_servidor], files: [attach] })
+        await member.roles.add(client.config.memberRoleId)
         member.user.send({ embeds: [embed_md] })
     } 
 }

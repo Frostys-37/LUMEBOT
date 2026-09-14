@@ -1,134 +1,57 @@
-const {
-    ApplicationCommandOptionType,
-    PermissionFlagsBits,
-    MessageFlags,
-} = require(`discord.js`);
-const Discord = require(`discord.js`);
-const emojis = require("./../../emojis.json");
+const { ApplicationCommandOptionType, MessageFlags } = require("discord.js");
 const ms = require("ms");
+const msg = require("../../utils/messages");
+const { validateModerationTarget, buildModLogEmbed, sendModLog } = require("../../utils/moderation");
+
 module.exports = {
-    name: `mute`,
-    category: "Staff",
-    usage: "/mute <usuario> <tiempo> <razón>",
-    description: `Silencia a un usuario en el servidor.`,
-    userPrems: [`ModerateMembers`],
-    options: [
-        {
-            name: `usuario`,
-            description: `Menciona a un usuario del servidor.`,
-            type: ApplicationCommandOptionType.User,
-            required: true,
-        },
-        {
-            name: "tiempo",
-            description: "Menciona el tiempo a mutear al usuario",
-            type: ApplicationCommandOptionType.String,
-            required: true,
-        },
-        {
-            name: `razón`,
-            description: `Coloca una razón para mutear al usuario.`,
-            type: ApplicationCommandOptionType.String,
-            required: true,
-        },
-    ],
+  name: "mute",
+  category: "Staff",
+  usage: "/mute <usuario> <tiempo> <razón>",
+  description: "Silencia a un usuario en el servidor.",
+  userPrems: ["ModerateMembers"],
+  botPerms: ["ModerateMembers"],
+  options: [
+    { name: "usuario", description: "Menciona a un usuario del servidor.", type: ApplicationCommandOptionType.User, required: true },
+    { name: "tiempo", description: "Menciona el tiempo a mutear al usuario", type: ApplicationCommandOptionType.String, required: true },
+    { name: "razón", description: "Coloca una razón para mutear al usuario.", type: ApplicationCommandOptionType.String, required: true },
+  ],
 
-    /**
-     *
-     * @param {LUMEBOT} client
-     * @param {CommandInteraction} interaction
-     */
+  run: async (client, interaction) => {
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
-    run: async (client, interaction) => {
-        await interaction.deferReply({
-            flags: [MessageFlags.Ephemeral],
-        });
+    const tiempo = interaction.options.getString("tiempo");
+    const reason = interaction.options.getString("razón");
+    const convertedTime = ms(tiempo);
 
-        const user = interaction.options.getMember("usuario");
-        const tiempo = interaction.options.getString("tiempo");
-        const convertedTime = ms(tiempo);
-        const reason = interaction.options.getString("razón");
-        const member = await interaction.guild.members.fetch(user.id);
+    if (!convertedTime || convertedTime < 10_000 || convertedTime > 2_419_200_000) {
+      return interaction.editReply({ content: msg.error("invalid_duration", { min: "10 segundos", max: "28 días" }) });
+    }
 
-        if (!user)
-            return interaction.reply({
-                content: "No has mencionado a un usuario.",
-                flags: [MessageFlags.Ephemeral],
-            });
-        if (!tiempo)
-            return interaction.reply({
-                content: "No has mencionado un tiempo.",
-                flags: [MessageFlags.Ephemeral],
-            });
-        if (!reason)
-            return interaction.reply({
-                content: "La razón es requerida.",
-                flags: [MessageFlags.Ephemeral],
-            });
+    const member = await interaction.guild.members.fetch(interaction.options.getUser("usuario").id).catch(() => null);
+    if (!member) return interaction.editReply({ content: msg.error("user_left_guild") });
 
-        if (
-            member.roles.highest.position >= interaction.member.roles.highest.position
-        )
-            return interaction.reply({
-                content: "El usuario tiene un rol mas alto que el tuyo.",
-                flags: [MessageFlags.Ephemeral],
-            });
+    const error = validateModerationTarget(client, interaction, member);
+    if (error) return interaction.editReply({ content: error });
 
-        if (
-            !interaction.guild.members.me.permissions.has(
-                PermissionFlagsBits.ModerateMembers,
-            )
-        )
-            return interaction.reply({
-                content: "No tengo permisos para moderar el servidor.",
-                flags: [MessageFlags.Ephemeral],
-            });
+    try {
+      await member.timeout(convertedTime, reason);
 
-        if (convertedTime < 10000 || convertedTime > 2419200000)
-            return interaction.reply({
-                content: "El tiempo debe ser entre 10 segundos y 28 días.",
-                flags: [MessageFlags.Ephemeral],
-            });
-        if (user.id === client.config.ownerID)
-            return interaction.reply({
-                content: "No puedes silenciar a mi desarrollador.",
-                flags: [MessageFlags.Ephemeral],
-            });
+      const embed = buildModLogEmbed({
+        client,
+        interaction,
+        actionTitle: "Usuario Silenciado",
+        emojiKey: "timeout",
+        target: member.user,
+        reason,
+        extraFields: [{ name: "Tiempo:", value: tiempo }],
+        footerText: msg.success("muted"),
+      });
 
-        const embed = new Discord.EmbedBuilder()
-            .setTitle(`${emojis.timeout} | Usuario Silenciado`)
-            .addFields(
-                { name: `${emojis.user} | Usuario:`, value: `${user} | ${user.id}` },
-                {
-                    name: `${emojis.moder} | Moderador:`,
-                    value: `[${interaction.member.roles.highest}] ${interaction.user.tag} | ${interaction.user.id}`,
-                },
-                { name: `${emojis.razon} | Razón:`, value: `${reason}` },
-                { name: `${emojis.reloj} | Tiempo:`, value: `${tiempo}` },
-                {
-                    name: `${emojis.channel} | Comando ejecutado en:`,
-                    value: `${interaction.channel.name}`,
-                },
-            )
-            .setColor(client.embedColor)
-            .setTimestamp(Date.now())
-            .setFooter(
-                { text: "Usuario Silenciado en el servidor" },
-                client.user.avatarURL(),
-            );
-
-        try {
-            await member.timeout(convertedTime, reason);
-
-            await interaction.editReply({
-                embeds: [embed],
-                flags: [MessageFlags.Ephemeral],
-            });
-            client.channels.fetch("1074861661665636352").then((channel) => {
-                channel.send({ embeds: [embed] });
-            });
-        } catch (err) {
-            console.log(err);
-        }
-    },
+      await interaction.editReply({ embeds: [embed] });
+      await sendModLog(client, embed);
+    } catch (err) {
+      console.error(err);
+      await interaction.editReply({ content: msg.error("unknown_command_error") });
+    }
+  },
 };

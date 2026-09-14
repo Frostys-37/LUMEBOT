@@ -13,7 +13,6 @@ module.exports = {
             description: `Coloca tu contenido, Tik Tok, YouTube, Twitch, etc, todo lo que tenga que ver con Lumecraft.`,
             type: ApplicationCommandOptionType.String,
             required: true
-
         }
     ],
 
@@ -66,18 +65,12 @@ module.exports = {
                 .setLabel('Ve al vídeo!')
                 .setStyle(ButtonStyle.Link));
 
-        const staffChannel = await client.channels.fetch("865406316889636864");
+        const staffChannel = await client.config.videoStaffChannelId;
         const msgStaff = await staffChannel.send({ embeds: [embed], components: [row] })
 
         await interaction.editReply({ content: "Tu vídeo ha sido enviado al equipo de moderación, pronto lo revisarán.", flags: [MessageFlags.Ephemeral] })
 
-        let ids = [
-            "535945446087065621",//ale
-            "857874928534814720",//tama
-            "793926625765883955",//Yo god
-            "536007600362356737",//Ana
-            "756763855379628102"//Cobra
-        ]
+        let ids = client.config.staffBypassIds;
 
         const filter = i => ["succes", "denied"].includes(i.customId) && ids.includes(i.user.id);
         const collector = staffChannel.createMessageComponentCollector({ filter, time: 86400000 });
@@ -87,7 +80,7 @@ module.exports = {
 
             if (i.customId === 'succes') {
               
-                const publicChannel = await client.channels.fetch("866062547819429908");
+                const publicChannel = await client.config.videoPublicChannelId;
                 await publicChannel.send({ content: "Video Aceptado", embeds: [embed], components: [li] })
                 
                 await msgStaff.edit({ content: `${emojis.succes} | Aceptado por ${i.user.tag}`, components: [] });

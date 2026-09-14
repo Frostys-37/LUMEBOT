@@ -82,7 +82,7 @@ module.exports = {
             .setFooter({ text: "Sistema de Reportes", iconURL: client.user.avatarURL() })
 
 
-        const staffChannel = await client.channels.fetch("931646202628436058");
+        const staffChannel = await client.channels.fetch(client.config.reportStaffChannelId);
         await staffChannel.send({ embeds: [embedStaff] })
 
         await interaction.editReply({ content: `Reporte enviado correctamente, gracias. ID del reporte: ${reporteId}\n\nCuando sea revisado y evaluado, nos pondremos en contacto contigo.`, flags: [MessageFlags.Ephemeral] });
