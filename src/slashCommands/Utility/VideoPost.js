@@ -65,7 +65,7 @@ module.exports = {
                 .setLabel('Ve al vídeo!')
                 .setStyle(ButtonStyle.Link));
 
-        const staffChannel = await client.config.videoStaffChannelId;
+        const staffChannel = await client.channels.fetch(client.config.videoStaffChannelId);
         const msgStaff = await staffChannel.send({ embeds: [embed], components: [row] })
 
         await interaction.editReply({ content: "Tu vídeo ha sido enviado al equipo de moderación, pronto lo revisarán.", flags: [MessageFlags.Ephemeral] })
@@ -80,7 +80,7 @@ module.exports = {
 
             if (i.customId === 'succes') {
               
-                const publicChannel = await client.config.videoPublicChannelId;
+                const publicChannel = await client.channels.fetch(client.config.videoPublicChannelId);
                 await publicChannel.send({ content: "Video Aceptado", embeds: [embed], components: [li] })
                 
                 await msgStaff.edit({ content: `${emojis.succes} | Aceptado por ${i.user.tag}`, components: [] });

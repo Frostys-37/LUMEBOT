@@ -35,6 +35,15 @@ module.exports = {
 
   staffBypassIds: parseList(process.env.STAFF_BYPASS_IDS),
 
+  //DASHBOARD
+  dashboard: {
+    port: process.env.DASHBOARD_PORT || 8080,
+    url: process.env.DASHBOARD_URL || "http://localhost:8080",
+    guildId: process.env.DASHBOARD_GUILD_ID || "793492909189365761",
+    ClientSecret: process.env.DISCORD_OAUTH_CLIENT_SECRET || "",
+    sessionSecret: process.env.DASHBOARD_SESSION_SECRET || "5e3f8c9a-1b2c-4d6e-9f3a-2b1c4d5e6f7g",
+  },
+
   links: {
     img: process.env.IMG || "",
     support: process.env.SUPPORT || "https://discord.gg/9zzcvRqb3A",

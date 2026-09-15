@@ -50,8 +50,8 @@ module.exports = {
                 }
             }
 
-            const canalSugerencias = await client.config.suggestionsChannelId;
-            if (!canalSugerencias) return interaction.editReply({ content: "Error: No se encontró el canal de sugerencias." });
+            const canalSugerencias = await client.channels.fetch(client.config.suggestionsChannelId);
+            if (!canalSugerencias) return interaction.editReply({ content: "No se encontró el canal de sugerencias." });
 
             const embedSugerencia = new EmbedBuilder()
             .setTitle("💡 | Nueva Sugerencia")
@@ -75,7 +75,7 @@ module.exports = {
             }
 
             await interaction.editReply({ 
-                content: bypassCooldown ? "Sugerencia enviada (Bypass de Staff activo)." : "Tu sugerencia ha sido enviada." 
+                content: bypassCooldown ? "Sugerencia enviada." : "Tu sugerencia ha sido enviada." 
             });
 
         } catch (error) {

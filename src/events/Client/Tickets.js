@@ -143,14 +143,19 @@ module.exports = {
         let ch = interaction.channel;
         if (!ch) return;
 
-        const member = await client.users.fetch(ch.topic);
+        const member = await client.users.fetch(ch.topic).catch(() => null);
+        if (!member) {
+          return interaction.editReply({
+            content: "No se pudo identificar al dueño original del ticket.",
+          });
+        }
+
         await interaction.channel.setParent(
           client.config.ticketClosedCategoryId,
         );
-
         await ch.permissionOverwrites.edit(member.id, { ViewChannel: false });
-
         await ch.setName(`close-${member.username}`);
+
         interaction.editReply({
           content: "Ticket Cerrado",
           flags: [MessageFlags.Ephemeral],
@@ -189,22 +194,29 @@ module.exports = {
         let ch = interaction.channel;
         if (!ch) return;
 
-        const member = await client.users.fetch(ch.topic);
+        const member = await client.users.fetch(ch.topic).catch(() => null);
+        const nombreArchivo = member ? member.username : "usuario-desconocido";
+
         const attachment = await discordTranscripts.createTranscript(ch, {
           returnType: "attachment",
-          fileName: `Transcript-${member.username}.html`,
+          fileName: `Transcript-${nombreArchivo}.html`,
           minify: true,
           saveImages: true,
           useCDN: true,
         });
 
-        client.channels
+        const canalTranscripts = await client.channels
           .fetch(client.config.ticketTranscriptChannelId)
-          .then((channel) => {
-            channel.send({ files: [attachment] });
-          });
+          .catch(() => null);
+        if (canalTranscripts) {
+          await canalTranscripts.send({ files: [attachment] });
+        } else {
+          console.warn(
+            "[Tickets] No se pudo enviar el transcript: TICKET_TRANSCRIPT_CHANNEL_ID inválido.",
+          );
+        }
 
-        interaction.channel.delete();
+        await interaction.channel.delete();
       }
     }
   },

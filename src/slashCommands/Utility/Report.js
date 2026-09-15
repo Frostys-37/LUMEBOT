@@ -70,10 +70,10 @@ module.exports = {
         const embedStaff = new Discord.EmbedBuilder()
             .setTitle(`${emojis.report} | Nuevo Reporte`)
             .setFields(
-                { name: `${emojis.user} | Usuario Discord:`, value: `${interaction.user} - ${interaction.user.id}` },
+                { name: `${emojis.user} | Reporte enviado por:`, value: `${interaction.user} - ${interaction.user.id}` },
                 { name: `${emojis.user} | Usuario Minecraft:`, value: `${usuario}` },
                 { name: `${emojis.reportmsg} | Reporte:`, value: `${reporte}` },
-                { name: `${emojis.link} | Enlace:`, value: `${link}` },
+                { name: `${emojis.link} | Enlace:`, value: `${link}\n(¡Ten cuidado con los enlaces que abres!)` },
                 { name: `${emojis.report_user} | ID del Reporte:`, value: `${reporteId}` }
             )
             .setImage(img.url)
@@ -88,7 +88,7 @@ module.exports = {
         await interaction.editReply({ content: `Reporte enviado correctamente, gracias. ID del reporte: ${reporteId}\n\nCuando sea revisado y evaluado, nos pondremos en contacto contigo.`, flags: [MessageFlags.Ephemeral] });
 
         try {
-            await interaction.user.send({ content: `Hola! Este es un mensaje automático para informarte que tu reporte con ID ${reporteId} ha sido recibido correctamente. Nuestro equipo de moderación revisará la información proporcionada y tomará las acciones necesarias. Te agradecemos por ayudarnos a mantener la comunidad segura y agradable para todos. Si tienes alguna pregunta adicional, no dudes en contactarnos a través del canal de reportes.` })
+            await interaction.user.send({ content: `¡Hola! Este es un mensaje automático.\n\nTu reporte con ID **${reporteId}** ha sido recibido correctamente. Nuestro equipo de moderación revisará la información proporcionada y tomará las acciones necesarias. Te agradecemos por ayudarnos a mantener la comunidad segura y agradable para todos.\n\nSi tienes alguna pregunta adicional, no dudes en contactarnos a través del canal de reportes.`})
         } catch (error) {
             console.log(`No se pudo enviar el mensaje directo al usuario ${interaction.user.tag}. Posiblemente tenga los mensajes directos desactivados.`)
         }

@@ -61,7 +61,7 @@ module.exports = {
                     { name: "Nota del Staff:", value: explicacion }
                 )
                 .setColor("Blue")
-                .setFooter({ text: "Gracias por hacer de este lugar un lugar mejor." });
+                .setFooter({ text: "Gracias por hacer del servidor un lugar mejor." });
 
             await user.send({ embeds: [embedUser] }).catch(() => {});
         }
