@@ -24,7 +24,7 @@ module.exports = function authRoutes(client) {
         "https://discord.com/api/oauth2/token",
         new URLSearchParams({
           client_id: client.config.clientID,
-          client_secret: client.config.dashboard.clientSecret,
+          client_secret: client.config.dashboard.ClientSecret,
           grant_type: "authorization_code",
           code,
           redirect_uri: REDIRECT_URI,

@@ -9,9 +9,21 @@ module.exports = function reportsRoutes(client, requireStaff) {
   const guard = requireStaff(client);
 
   router.get("/", guard, async (req, res) => {
-    const reportes = await Reporte.find({}).sort({ timestamp: -1 }).limit(100);
-    res.json(reportes);
-  });
+    const reportes = await Reporte.find({}).sort({ timestamp: -1 }).limit(100).lean();
+
+    const tags = await Promise.all(
+      reportes.map(async (rep) => {
+        const reporter = await client.users.fetch(rep.userId).catch(() => null);
+        
+        return {
+          ...rep,
+          reporterTag: reporter ? reporter.tag : "ID desconocido (${rep.userId})",
+          reporterAvatar: reporter ? reporter.displayAvatarURL({ size: 64,dynamic: true }) : null,
+        };
+      })
+    )
+      res.json(tags); 
+   });
 
   router.patch("/:reportId", guard, async (req, res) => {
     const { status, staffAction } = req.body;

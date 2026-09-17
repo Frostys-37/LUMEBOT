@@ -1,5 +1,6 @@
 module.exports = function requireStaff(client) {
     return async function (req, res, next) {
+        console.log('sesion:', req.session.user, '| cookie header:', req.headers.cookie);
         if (!req.session.user) {
             return res.status(401).json({ error: "No estás autenticado. Por favor, inicia sesión." });
         }
