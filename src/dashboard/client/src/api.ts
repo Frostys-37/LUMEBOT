@@ -1,8 +1,10 @@
 import type { Reporte, Miembro, AccionModeracion, EstadoReporte } from "./types";
 
+const API_ORIGIN = import.meta.env.VITE_API_ORIGIN ?? "";
+
 async function manejarRespuesta<T>(res: Response): Promise<T> {
   if (res.status === 401 || res.status === 403) {
-    window.location.href = "/";
+    window.location.href = `${API_ORIGIN}/`;
     throw new Error("No autenticado");
   }
   const data = await res.json();
