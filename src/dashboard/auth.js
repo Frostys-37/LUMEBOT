@@ -38,13 +38,17 @@ module.exports = function authRoutes(client) {
         headers: { Authorization: `Bearer ${access_token}` },
       });
 
+      const avatarUrl = userRes.data.avatar
+        ? `https://cdn.discordapp.com/avatars/${userRes.data.id}/${userRes.data.avatar}.png`
+        : `https://cdn.discordapp.com/embed/avatars/${Number(userRes.data.discriminator || 0) % 5}.png`;
+
       req.session.user = {
         id: userRes.data.id,
         username: userRes.data.username,
-        avatar: userRes.data.avatar,
+        avatar: avatarUrl,
       };
 
-      res.redirect("/dashboard");
+      res.redirect("/");
     } catch (err) {
       console.error("[dashboard] Error en OAuth callback:", err.response?.data || err.message);
       res.redirect("/?error=auth_failed");

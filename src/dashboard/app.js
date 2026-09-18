@@ -6,6 +6,7 @@ const requireStaff = require("./middleware/requireStaff");
 const reportsRoutes = require("./routes/report");
 const membersRoutes = require("./routes/member");
 const moderationRoutes = require("./routes/moderation");
+const sanctionsRoutes = require("./routes/sanctions");
 const { MongoStore } = require("connect-mongo");
 
 module.exports = function initDashboard(app, client) {
@@ -32,6 +33,7 @@ module.exports = function initDashboard(app, client) {
   app.use("/api/reports", reportsRoutes(client, requireStaff));
   app.use("/api/members", membersRoutes(client, requireStaff));
   app.use("/api/moderation", moderationRoutes(client, requireStaff));
+  app.use("/api/sanctions", sanctionsRoutes(client, requireStaff));
 
   app.get("/api/me", (req, res) => {
     if (!req.session.user) return res.status(401).json({ error: "No autenticado." });

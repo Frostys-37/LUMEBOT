@@ -41,6 +41,7 @@ module.exports = {
       emojiKey: "ban",
       target,
       reason,
+      source: "discord",
       footerText: msg.success("banned"),
     });
 

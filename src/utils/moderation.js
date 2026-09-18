@@ -1,6 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
 const msg = require("./messages");
 const emojis = require("../emojis.json");
+const Sancion = require("../schema/sanciones");
 
 function validateModerationTarget(client, interaction, member) {
     if(member.id === client.config.ownerID) {
@@ -48,8 +49,23 @@ async function sendModLog(client, embed) {
     }
 }
 
+async function registrarSancion({ guildId, target, staff, type, reason, duration, source = "discord" }) {
+  await Sancion.create({
+    GuildID: guildId,
+    TargetID: target.id,
+    TargetTag: target.tag,
+    StaffID: staff.id,
+    StaffTag: staff.tag,
+    Type: type,
+    Reason: reason,
+    Duration: duration,
+    Source: source,
+  });
+}
+
 module.exports = {
     validateModerationTarget,
     buildModLogEmbed,
-    sendModLog
+    sendModLog,
+    registrarSancion
 }

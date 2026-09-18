@@ -7,7 +7,7 @@ module.exports = {
     name: "userinfo",
     description: "Muestra el expediente completo de un usuario (Warns, Sanciones y Datos).",
     usage: "/userinfo <usuario>",
-    category: "Moderación",
+    category: "Staff",
     userPrems: ["ModerateMembers"],
     options: [
         {

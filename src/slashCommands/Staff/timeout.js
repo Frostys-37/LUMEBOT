@@ -42,6 +42,7 @@ module.exports = {
         actionTitle: "Usuario Silenciado",
         emojiKey: "timeout",
         target: member.user,
+        source: "discord",
         reason,
         extraFields: [{ name: "Tiempo:", value: tiempo }],
         footerText: msg.success("muted"),

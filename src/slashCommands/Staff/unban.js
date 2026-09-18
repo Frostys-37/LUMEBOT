@@ -29,6 +29,7 @@ module.exports = {
       actionTitle: "Usuario Desbaneado",
       emojiKey: "ban",
       target,
+      source: "discord",
       extraFields: [{ name: "Nota:", value: "[ REGRESA DEL BAN ]" }],
       footerText: msg.success("unbanned"),
     });

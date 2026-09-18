@@ -35,6 +35,7 @@ module.exports = {
       emojiKey: "kick",
       target,
       reason,
+      source: "discord",
       footerText: msg.success("kicked"),
     });
 

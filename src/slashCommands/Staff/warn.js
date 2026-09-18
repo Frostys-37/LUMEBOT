@@ -49,6 +49,7 @@ module.exports = {
       actionTitle: "Advertencia a Usuario",
       emojiKey: "warn",
       target,
+      source: "discord",
       reason,
       footerText: msg.success("warned"),
     });
