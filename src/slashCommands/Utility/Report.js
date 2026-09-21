@@ -55,17 +55,9 @@ module.exports = {
         if (!usuario || !reporte || !img) return interaction.editReply({ content: "Faltan argumentos, por favor revisa el comando e intenta de nuevo.", flags: [MessageFlags.Ephemeral] })
 
         const reporteId = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const nombreArchivo = img.name || "evidencia.png"
 
-        const nuevoReporte = new (require("./../../schema/reports"))({
-            reportId: reporteId,
-            userId: interaction.user.id,
-            mcUser: usuario,
-            reason: reporte,
-            evidence: img.url,
-            link: link
-        });
-
-        await nuevoReporte.save();
+        const staffChannel = await client.channels.fetch(client.config.reportStaffChannelId);
 
         const embedStaff = new Discord.EmbedBuilder()
             .setTitle(`${emojis.report} | Nuevo Reporte`)
@@ -76,14 +68,26 @@ module.exports = {
                 { name: `${emojis.link} | Enlace:`, value: `${link}\n(¡Ten cuidado con los enlaces que abres!)` },
                 { name: `${emojis.report_user} | ID del Reporte:`, value: `${reporteId}` }
             )
-            .setImage(img.url)
+            .setImage(`attachment://${nombreArchivo}`)
             .setColor(client.embedColor)
             .setTimestamp()
             .setFooter({ text: "Sistema de Reportes", iconURL: client.user.avatarURL() })
 
 
-        const staffChannel = await client.channels.fetch(client.config.reportStaffChannelId);
-        await staffChannel.send({ embeds: [embedStaff] })
+        const mensajeReporte = await staffChannel.send({ embeds: [embedStaff], files: [{attachment: img.url, name: nombreArchivo }]})
+
+        const evidenciaPerma = mensajeReporte.attachments.first()?.url || img.url;
+
+        const nuevoReporte = new (require("./../../schema/reports"))({
+            reportId: reporteId,
+            userId: interaction.user.id,
+            mcUser: usuario,
+            reason: reporte,
+            evidence: evidenciaPerma,
+            link: link
+        });
+
+        await nuevoReporte.save();
 
         await interaction.editReply({ content: `Reporte enviado correctamente, gracias. ID del reporte: ${reporteId}\n\nCuando sea revisado y evaluado, nos pondremos en contacto contigo.`, flags: [MessageFlags.Ephemeral] });
 

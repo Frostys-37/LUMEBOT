@@ -2,9 +2,6 @@ const LUMEBOT = require("./structures/Client");
 const Discord = require("discord.js");
 const client = new LUMEBOT();
 
-const express = require("express");
-const initDashboard = require("./dashboard/app");
-
 client.connect();
 
 process.on("unhandledRejection", (reason, p) => {
@@ -92,20 +89,6 @@ client.on("interactionCreate", async (interaction) => {
         .setFooter({ text: `HelpCommand.` });
       await interaction.update({ embeds: [editEmbed] });
     }
-  }
-});
-
-client.once("clientReady", () => {
-  const app = express();
-  const iniciado = initDashboard(app, client);
-
-  if (iniciado) {
-    app.listen(client.config.dashboard.port, () => {
-      client.logger.log(
-        `Dashboard corriendo en ${client.config.dashboard.url}`,
-        "event",
-      );
-    });
   }
 });
 

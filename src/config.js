@@ -44,6 +44,24 @@ module.exports = {
     sessionSecret: process.env.DASHBOARD_SESSION_SECRET || "5e3f8c9a-1b2c-4d6e-9f3a-2b1c4d5e6f7g",
   },
 
+  streams: {
+    announceChannelID: process.env.STREAM_ANNOUNCE_CHANNEL_ID,
+    checkIntervalsMs: Number(process.env.STREAM_CHECK_INTERVAL_MS) || 90_000,
+    twtich: {
+      clientId: process.env.TWTICH_CLIENT_ID,
+      clientSeret: process.env.TWTICH_CLIENT_SECRET,
+      channels: parseList(process.env.TWTICH_CHANNELS),
+    },
+    youtube: {
+      apiKey: process.env.YOUTUBE_API_KEY,
+      channelIds: parseList(process.env.YOUTUBE_CHANNEL_IDS),
+    },
+    kick: {
+      channels: parseList(process.env.KICK_CHANNELS),
+    }
+
+  },
+
   links: {
     img: process.env.IMG || "",
     support: process.env.SUPPORT || "https://discord.gg/9zzcvRqb3A",

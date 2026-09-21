@@ -15,6 +15,8 @@ module.exports = function initDashboard(app, client) {
     return false;
   }
 
+  app.use(express.json())
+
   app.use(
   session({
     secret: client.config.dashboard.sessionSecret,

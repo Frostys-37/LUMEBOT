@@ -7,11 +7,16 @@ import { EstadoBadge } from "./EstadoBadge";
 
 const ESTADOS: EstadoReporte[] = ["Pendiente", "Aceptado", "Denegado", "Resuelto"];
 
+interface Borrador {
+  status: EstadoReporte;
+  staffAction: string;
+}
+
 export function ReportsTable() {
   const [reportes, setReportes] = useState<Reporte[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [borradores, setBorradores] = useState<Record<string, EstadoReporte>>({});
+  const [borradores, setBorradores] = useState<Record<string, Borrador>>({});
   const [guardandoId, setGuardandoId] = useState<string | null>(null);
 
   async function cargar() {
@@ -20,6 +25,15 @@ export function ReportsTable() {
       const datos = await api.obtenerReportes();
       setReportes(datos);
       setError(null);
+      setBorradores((prev) => {
+        const nuevo = { ...prev };
+        for (const rep of datos) {
+          if (!nuevo[rep.reportId]) {
+            nuevo[rep.reportId] = { status: rep.status, staffAction: rep.staffAction === "Ninguna" ? "" : rep.staffAction };
+          }
+        }
+        return nuevo;
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al cargar reportes.");
     } finally {
@@ -31,12 +45,19 @@ export function ReportsTable() {
     cargar();
   }, []);
 
+  function actualizarBorrador(reportId: string, cambios: Partial<Borrador>) {
+    setBorradores((prev) => ({
+      ...prev,
+      [reportId]: { ...prev[reportId], ...cambios },
+    }));
+  }
+
   async function guardar(reportId: string) {
-    const nuevoEstado = borradores[reportId];
-    if (!nuevoEstado) return;
+    const borrador = borradores[reportId];
+    if (!borrador) return;
     setGuardandoId(reportId);
     try {
-      await api.actualizarReporte(reportId, nuevoEstado);
+      await api.actualizarReporte(reportId, borrador.status, borrador.staffAction);
       await cargar();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al guardar.");
@@ -84,52 +105,48 @@ export function ReportsTable() {
                 <th className="p-3 font-medium">Motivo</th>
                 <th className="p-3 font-medium">Pruebas</th>
                 <th className="p-3 font-medium">Estado</th>
-                <th className="p-3 font-medium">Acción</th>
+                <th className="p-3 font-medium min-w-[260px]">Sanción / Acción tomada</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-discord-border/60">
-              {reportes.map((rep) => (
-                <tr key={rep._id} className="hover:bg-discord-surface2/60 transition-colors">
-                  <td className="p-3 font-mono text-xs text-gray-500">{rep.reportId}</td>
-                  <td className="p-3">
-                    <div className="flex items-center gap-2">
-                      {rep.reporterAvatar && (
-                        <img src={rep.reporterAvatar} alt={rep.reporterTag} className="w-6 h-6 rounded-full" />
-                      )}
-                      <span className="text-gray-200">{rep.reporterTag}</span>
-                    </div>
-                  </td>
-                  <td className="p-3 font-medium">{rep.mcUser}</td>
-                  <td className="p-3 max-w-xs truncate text-gray-300" title={rep.reason}>
-                    {rep.reason}
-                  </td>
-                  <td className="p-3">
-                    <div className="flex items-center gap-2">
-                      <Imagen src={rep.evidence} alt={`Evidencia de ${rep.reportId}`} />
-                      {rep.link && (
-                        <a
-                          href={rep.link}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center gap-1 text-xs text-discord-blurple hover:underline"
-                        >
-                          <ExternalLink size={12} />
-                          Enlace
-                        </a>
-                      )}
-                    </div>
-                  </td>
-                  <td className="p-3">
-                    <EstadoBadge estado={rep.status} />
-                  </td>
-                  <td className="p-3">
-                    <div className="flex items-center gap-2">
+              {reportes.map((rep) => {
+                const borrador = borradores[rep.reportId] ?? { status: rep.status, staffAction: "" };
+                return (
+                  <tr key={rep._id} className="hover:bg-discord-surface2/60 transition-colors align-top">
+                    <td className="p-3 font-mono text-xs text-gray-500">{rep.reportId}</td>
+                    <td className="p-3">
+                      <div className="flex items-center gap-2">
+                        {rep.reporterAvatar && (
+                          <img src={rep.reporterAvatar} alt={rep.reporterTag} className="w-6 h-6 rounded-full" />
+                        )}
+                        <span className="text-gray-200">{rep.reporterTag}</span>
+                      </div>
+                    </td>
+                    <td className="p-3 font-medium">{rep.mcUser}</td>
+                    <td className="p-3 max-w-xs truncate text-gray-300" title={rep.reason}>
+                      {rep.reason}
+                    </td>
+                    <td className="p-3">
+                      <div className="flex items-center gap-2">
+                        <Imagen src={rep.evidence} alt={`Evidencia de ${rep.reportId}`} />
+                        {rep.link && (
+                          <a
+                            href={rep.link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-1 text-xs text-discord-blurple hover:underline"
+                          >
+                            <ExternalLink size={12} />
+                            Enlace
+                          </a>
+                        )}
+                      </div>
+                    </td>
+                    <td className="p-3">
                       <select
-                        className="bg-discord-surface2 border border-discord-border rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-discord-blurple"
-                        value={borradores[rep.reportId] ?? rep.status}
-                        onChange={(e) =>
-                          setBorradores((prev) => ({ ...prev, [rep.reportId]: e.target.value as EstadoReporte }))
-                        }
+                        className="bg-discord-surface2 border border-discord-border rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-discord-blurple mb-2"
+                        value={borrador.status}
+                        onChange={(e) => actualizarBorrador(rep.reportId, { status: e.target.value as EstadoReporte })}
                       >
                         {ESTADOS.map((estado) => (
                           <option key={estado} value={estado}>
@@ -137,17 +154,29 @@ export function ReportsTable() {
                           </option>
                         ))}
                       </select>
+                      <div>
+                        <EstadoBadge estado={rep.status} />
+                      </div>
+                    </td>
+                    <td className="p-3">
+                      <textarea
+                        rows={2}
+                        placeholder="Describe la sanción o acción tomada (ej: 'Muteado 1h', 'Advertencia verbal')..."
+                        className="w-full bg-discord-surface2 border border-discord-border rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-discord-blurple resize-none mb-2"
+                        value={borrador.staffAction}
+                        onChange={(e) => actualizarBorrador(rep.reportId, { staffAction: e.target.value })}
+                      />
                       <button
                         onClick={() => guardar(rep.reportId)}
                         disabled={guardandoId === rep.reportId}
                         className="bg-discord-blurple hover:bg-indigo-500 disabled:opacity-50 text-white text-sm font-medium px-3 py-1.5 rounded-md transition"
                       >
-                        {guardandoId === rep.reportId ? "..." : "Guardar"}
+                        {guardandoId === rep.reportId ? "Guardando..." : "Guardar"}
                       </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

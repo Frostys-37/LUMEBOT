@@ -15,17 +15,22 @@ module.exports = function memberRoutes(client, requireStaff) {
             return res.status(500).json({ error: "No se pudo encontrar el servidor configurado." });
         }
 
-        let resultados = guild.members.cache.filter(
-            (m) => m.user.username.toLowerCase().includes(query) || m.displayName.toLowerCase().includes(query)
-        );
+        let miembros = [];
 
-        if(resultados.size === 0 && /^<@!?(\d+)>$/.test(query)) {
-            const porId = await guild.members.fetch(query).catch(() => null);
-            if(porId) {
-                resultados = new Map([[porId.id, porId]]);
+        try {
+            if(/^\d{15,20}$/.test(query)) {
+                const porId = await guild.members.fetch(query).catch(() => null);
+                if(porId) miembros = [porId];
+            } else {
+                const encontrados = await guild.members.fetch({query, limit: 20})
+                miembros = [...encontrados.values()]
             }
+        } catch (err) {
+            constole.error("[dashboard] Error buscando miembros:", err);
+            return res.status(500).json({error: "Error al buscar miembros en discord."})
+        }
 
-            const lista = [...resultados.values()].slice(0,20).map((m) => ({
+            const lista = miembros.map((m) => ({
                 id: m.id,
                 username: m.user.username,
                 tag: m.displayName,
@@ -33,8 +38,7 @@ module.exports = function memberRoutes(client, requireStaff) {
                 highestRole: m.roles.highest.name,
                 joinedAt: m.joinedAt,
             }));
-            return res.json(lista);
-        }
+            res.json(lista);
     });
     return router;
 }
