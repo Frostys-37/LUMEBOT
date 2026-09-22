@@ -20,7 +20,7 @@ async function obtenerToken(client) {
 
     return cachedToken;
 }
-
+//SIRVE
 async function verificarTwitch(client) {
     const { channels, clientId, clientSecret } = client.config.streams.twitch;
     if(!channels.length || !clientId || !clientSecret) return [];
