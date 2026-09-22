@@ -92,4 +92,10 @@ client.on("interactionCreate", async (interaction) => {
   }
 });
 
+client.once("clientReady", () => {
+  const streamMonitor = require("./services/streamMonitor");
+  console.log("streamMonitor exporta:", streamMonitor); 
+  streamMonitor.iniciarMonitorDeStreams(client);
+});
+
 module.exports = client;

@@ -45,12 +45,12 @@ module.exports = {
   },
 
   streams: {
-    announceChannelID: process.env.STREAM_ANNOUNCE_CHANNEL_ID,
-    checkIntervalsMs: Number(process.env.STREAM_CHECK_INTERVAL_MS) || 90_000,
-    twtich: {
-      clientId: process.env.TWTICH_CLIENT_ID,
-      clientSeret: process.env.TWTICH_CLIENT_SECRET,
-      channels: parseList(process.env.TWTICH_CHANNELS),
+    announceChannelId: process.env.STREAM_ANNOUNCE_CHANNEL_ID,
+    checkIntervalsMs: Number(process.env.STREAM_CHECK_INTERVAL_MS) || 90000,
+    twitch: {
+      clientId: process.env.TWITCH_CLIENT_ID,
+      clientSeret: process.env.TWITCH_CLIENT_SECRET,
+      channels: parseList(process.env.TWITCH_CHANNELS),
     },
     youtube: {
       apiKey: process.env.YOUTUBE_API_KEY,

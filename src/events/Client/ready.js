@@ -1,5 +1,4 @@
 const { Activity } = require("discord.js");
-const { iniciarMonitorDeStreams } = require("../../services/streamMonitor");
 const express = require("express");
 const initDashboard = require("../../dashboard/app");
 module.exports = {
@@ -28,6 +27,6 @@ module.exports = {
         );
       });
     }
-    iniciarMonitorDeStreams(client);
+
   },
 };

@@ -6,7 +6,7 @@ let tokenExpiresAt = 0;
 async function obtenerToken(client) {
     if(cachedToken && Date.now() < tokenExpiresAt) return cachedToken;
 
-    const { clientId, clientSecret } = client.config.streams.twtich;
+    const { clientId, clientSecret } = client.config.streams.TWITCH;
     const res = await axios.post("https://id.twitch.tv/oauth2/token", null, {
         params: {
             client_id: clientId,
