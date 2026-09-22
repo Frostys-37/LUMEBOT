@@ -40,21 +40,31 @@ async function anunciar(client, stream) {
 
 async function procesarCanal(client, canal, activos) {
   const encontrado = activos.find(
-    (a) => a.platform === canal.platform && a.channel.toLowerCase() === canal.channel.toLowerCase(),
+    (a) => a.platform === canal.platform && a.channel.toLowerCase() === canal.channel.toLowerCase()
   );
 
   const estado = await StreamState.findOneAndUpdate(
-    { platform: canal.platform, channel: canal.channel },
+    { platform: canal.platform, channel: canal.channel.toLowerCase() },
     {},
-    { upsert: true, returnDocument: 'after' },
+    { upsert: true, returnDocument: 'after' } 
   );
 
-  if (encontrado && !estado.isLive) {
-    await anunciar(client, encontrado);
-    estado.isLive = true;
-    estado.lastStreamId = encontrado.streamId;
-    await estado.save();
+  if (encontrado) {
+    const titulo = (encontrado.title || "").toLowerCase();
+    const lumecraft = titulo.includes("lumecraft");
+
+    if (lumecraft && !estado.isLive) {
+      console.log(`[streams] Directo detectado con título válido ("${encontrado.title}"). Enviando anuncio...`);
+      await anunciar(client, encontrado);
+      
+      estado.isLive = true;
+      estado.lastStreamId = encontrado.streamId;
+      await estado.save();
+    } else if (!lumecraft && !estado.isLive) {
+      console.log(`[streams] ⏩ ${canal.channel} está en vivo, pero el título ("${encontrado.title}") no contiene 'lumecraft'. Omitiendo.`);
+    }
   } else if (!encontrado && estado.isLive) {
+    console.log(`[streams] El directo de ${canal.channel} ha terminado.`);
     estado.isLive = false;
     await estado.save();
   }

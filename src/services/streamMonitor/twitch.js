@@ -22,7 +22,7 @@ async function obtenerToken(client) {
 }
 
 async function verificarTwitch(client) {
-    const { chanels, clientId, clientSecret } = client.config.streams.twitch;
+    const { channels, clientId, clientSecret } = client.config.streams.twitch;
     if(!channels.length || !clientId || !clientSecret) return [];
 
     const token = await obtenerToken(client);
