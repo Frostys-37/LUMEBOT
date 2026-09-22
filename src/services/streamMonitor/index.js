@@ -22,8 +22,18 @@ async function anunciar(client, stream) {
     .setFooter({ text: NOMBRES[stream.platform] })
     .setTimestamp();
 
+    const emj = "";
+
+    if(NOMBRES[stream.plataform] === NOMBRES.youtube) {
+      emj = "<:youtube:959908410646736926>";
+    } else if(NOMBRES[stream.plataform] === NOMBRES.twitch) {
+      emj = "<:Twitchlogo:1552014131270516808>"
+    } else if(NOMBRES[stream.plataform] === NOMBRES.kick) {
+      emj = "<:Kick:1552014458648268870>";
+    }
+
   await canalAnuncio.send({
-    content: `📢 ¡**${stream.channelName || stream.channel}** está en vivo en ${NOMBRES[stream.platform]}! ${stream.url}`,
+    content: `${emj || "📢"} ¡**${stream.channelName || stream.channel}** está en vivo en ${NOMBRES[stream.platform]}! ${stream.url}`,
     embeds: [embed],
   });
 }
@@ -81,6 +91,10 @@ async function verificarTodo(client) {
       verificarKickConCircuitBreaker(client),
     ]);
 
+    console.log("Twitch live:", twitchLive);
+    console.log("YouTube live:", youtubeLive);
+    console.log("Kick live:", kickLive);
+
     const todosLosCanales = [
       ...(twitchCfg.channels || []).map((c) => ({ platform: "twitch", channel: c })),
       ...(youtubeCfg.channelIds || []).map((c) => ({ platform: "youtube", channel: c })),
@@ -110,4 +124,4 @@ function iniciarMonitorDeStreams(client) {
   console.log(`[streams] Monitor de streams iniciado (cada ${intervalo / 1000}s).`);
 }
 
-module.exports = { iniciarMonitorDeStreams };
+module.exports = { iniciarMonitorDeStreams, verificarTodo };
