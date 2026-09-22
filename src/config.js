@@ -49,7 +49,7 @@ module.exports = {
     checkIntervalsMs: Number(process.env.STREAM_CHECK_INTERVAL_MS) || 90000,
     twitch: {
       clientId: process.env.TWITCH_CLIENT_ID,
-      clientSeret: process.env.TWITCH_CLIENT_SECRET,
+      clientSecret: process.env.TWITCH_CLIENT_SECRET,
       channels: parseList(process.env.TWITCH_CHANNELS),
     },
     youtube: {

@@ -22,14 +22,13 @@ async function anunciar(client, stream) {
     .setFooter({ text: NOMBRES[stream.platform] })
     .setTimestamp();
 
-    const emj = "";
-
-    if(NOMBRES[stream.plataform] === NOMBRES.youtube) {
-      emj = "<:youtube:959908410646736926>";
-    } else if(NOMBRES[stream.plataform] === NOMBRES.twitch) {
-      emj = "<:Twitchlogo:1552014131270516808>"
-    } else if(NOMBRES[stream.plataform] === NOMBRES.kick) {
-      emj = "<:Kick:1552014458648268870>";
+    let emj = "";
+    if (NOMBRES[stream.platform] === NOMBRES.youtube) {
+        emj = "<:youtube:959908410646736926>";
+    } else if (NOMBRES[stream.platform] === NOMBRES.twitch) {
+        emj = "<:Twitchlogo:1552014131270516808>";
+    } else if (NOMBRES[stream.platform] === NOMBRES.kick) {
+        emj = "<:Kick:1552014458648268870>";
     }
 
   await canalAnuncio.send({
@@ -54,19 +53,16 @@ async function procesarCanal(client, canal, activos) {
     const lumecraft = titulo.includes("lumecraft");
 
     if (lumecraft && !estado.isLive) {
-      console.log(`[streams] Directo detectado con título válido ("${encontrado.title}"). Enviando anuncio...`);
-      await anunciar(client, encontrado);
-      
-      estado.isLive = true;
-      estado.lastStreamId = encontrado.streamId;
-      await estado.save();
-    } else if (!lumecraft && !estado.isLive) {
-      console.log(`[streams] ⏩ ${canal.channel} está en vivo, pero el título ("${encontrado.title}") no contiene 'lumecraft'. Omitiendo.`);
+      const bloqueo = await StreamState.findOneAndUpdate(
+        { platform: canal.platform, channel: canal.channel.toLowerCase(), isLive: {$ne: true }},
+        { $set: { isLive: true, lastStreamId: encontrado.streamId}},
+        { returnDocument: 'after' }
+      );
+      if(bloqueo) {
+        console.log(`[streams] Directo detectado con título válido ("${encontrado.title}"). Enviando anuncio...`);
+        await anunciar(client, encontrado);
+      }
     }
-  } else if (!encontrado && estado.isLive) {
-    console.log(`[streams] El directo de ${canal.channel} ha terminado.`);
-    estado.isLive = false;
-    await estado.save();
   }
 }
 

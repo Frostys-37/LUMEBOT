@@ -97,7 +97,6 @@ client.once("clientReady", () => {
   console.log("streamMonitor exporta:", streamMonitor); 
   streamMonitor.iniciarMonitorDeStreams(client);
 
-  streamMonitor.verificarTodo(client);
 });
 
 module.exports = client;
