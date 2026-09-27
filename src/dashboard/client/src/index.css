@@ -3,5 +3,5 @@
 @tailwind utilities;
 
 body {
-  @apply bg-discord-bg text-gray-100;
+ @apply bg-discord-bg text-gray-100;
 }
