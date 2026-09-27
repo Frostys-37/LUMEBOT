@@ -1,4 +1,4 @@
-import type { Reporte, Miembro, AccionModeracion, EstadoReporte } from "./types";
+import type { Reporte, Miembro, AccionModeracion, EstadoReporte, ModalidadEstado } from "./types";
 
 async function manejarRespuesta<T>(res: Response): Promise<T> {
   const data = await res.json().catch(() => ({}));
@@ -38,5 +38,10 @@ export const api = {
       body: JSON.stringify({ userId, reason, duration }),
     });
     await manejarRespuesta<{ ok: boolean }>(res);
+  },
+
+  async obtenerEstadoServidor(): Promise<ModalidadEstado[]> {
+    const res = await fetch("/api/server-status");
+    return manejarRespuesta<ModalidadEstado[]>(res);
   },
 };
