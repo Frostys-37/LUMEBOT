@@ -49,20 +49,21 @@ async function procesarCanal(client, canal, activos) {
   );
 
   if (encontrado) {
-    const titulo = (encontrado.title || "").toLowerCase();
-    const lumecraft = titulo.includes("lumecraft");
+    const lumecraft = (encontrado.title || "").toLowerCase().includes("lumecraft");
 
     if (lumecraft && !estado.isLive) {
       const bloqueo = await StreamState.findOneAndUpdate(
-        { platform: canal.platform, channel: canal.channel.toLowerCase(), isLive: {$ne: true }},
-        { $set: { isLive: true, lastStreamId: encontrado.streamId}},
+        { platform: canal.platform, channel: canal.channel.toLowerCase(), isLive: { $ne: true } },
+        { $set: { isLive: true, lastStreamId: encontrado.streamId } },
         { returnDocument: 'after' }
       );
-      if(bloqueo) {
-        console.log(`[streams] Directo detectado con título válido ("${encontrado.title}"). Enviando anuncio...`);
-        await anunciar(client, encontrado);
-      }
+      if (bloqueo) await anunciar(client, encontrado);
     }
+  } else if (estado.isLive) {
+    await StreamState.findOneAndUpdate(
+      { platform: canal.platform, channel: canal.channel.toLowerCase() },
+      { $set: { isLive: false } },
+    );
   }
 }
 
@@ -119,7 +120,7 @@ async function verificarTodo(client) {
 
 function iniciarMonitorDeStreams(client) {
   if (!client.config.streams?.announceChannelId) {
-    console.warn("[streams] STREAM_ANNOUNCE_CHANNEL_ID no configurado -- el monitor de streams no se inició.");
+    console.warn("[streams] STREAM_ANNOUNCE_CHANNEL_ID no configurado: El monitor de streams no se inició.");
     return;
   }
 
@@ -127,7 +128,7 @@ function iniciarMonitorDeStreams(client) {
 
   verificarTodo(client);
   setInterval(() => verificarTodo(client), intervalo);
-  console.log(`[streams] Monitor de streams iniciado (cada ${intervalo / 1000}s).`);
+  console.log(`[streams] Monitor de streams iniciado.`);
 }
 
 module.exports = { iniciarMonitorDeStreams, verificarTodo };
