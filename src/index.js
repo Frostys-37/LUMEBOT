@@ -98,7 +98,6 @@ client.once("clientReady", () => {
   const { iniciarMonitorDeServidores } = require("./services/serverMonitor/index");
   console.log("streamMonitor exporta:", streamMonitor); 
   streamMonitor.iniciarMonitorDeStreams(client);
-  iniciarMonitorDeStreams(client);
   iniciarMonitorDeServidores(client);
 
 });

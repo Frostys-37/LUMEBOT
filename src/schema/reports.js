@@ -9,7 +9,10 @@ const ReporteSchema = new mongoose.Schema({
     link: { type: String, default: "No proporcionado" },
     status: { type: String, default: "Pendiente" },
     staffAction: { type: String, default: "Ninguna" },
-    timestamp: { type: Date, default: Date.now }
+    timestamp: { type: Date, default: Date.now },
+    evidenceChannelId: { type: String },
+    evidenceMessageId: { type: String },
+
 });
 
 module.exports = mongoose.model('Reporte', ReporteSchema);

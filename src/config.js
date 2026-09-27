@@ -63,8 +63,9 @@ module.exports = {
     kick: {
       channels: parseList(process.env.KICK_CHANNELS),
     },
+  },
 
-    // MONITOR SERVIDOR
+  // MONITOR SERVIDOR
     mcMonitor: {
       alertChannelId: process.env.MC_MONITOR_ALERT_CHANNEL_ID,
       checkIntervalMs: Number(process.env.MC_MONITOR_CHECK_INTERVAL_MS) || 60_000,
@@ -73,9 +74,7 @@ module.exports = {
         { nombre: "Prisión", host: process.env.MC_MODALIDAD_PRISION_HOST, port: Number(process.env.MC_MODALIDAD_PRISION_PORT) || 25565 },
         { nombre: "Survival", host: process.env.MC_MODALIDAD_SURVIVAL_HOST, port: Number(process.env.MC_MODALIDAD_SURVIVAL_PORT) || 25565 },
       ].filter((m) => m.host),
-},
-
-  },
+    },
 
   links: {
     img: process.env.IMG || "",

@@ -1,6 +1,8 @@
 const { getStatus } = require("mc-server-status");
 const { EmbedBuilder } = require("discord.js");
 const ServerState = require("../../schema/estadoServidor");
+const EstadoEmbed = require("../../schema/estadoEmbed");
+const emojis = require("../../emojis.json")
 
 const FALLOS_PARA_ALERTAR = 2;
 
@@ -21,48 +23,97 @@ async function revisarModalidad(client, modalidad) {
     { upsert: true, returnDocument: "after" },
   );
 
+  let transicion = null;
+
   if (!enLinea) {
     estado.fallosSeguidos += 1;
 
     if (estado.fallosSeguidos === FALLOS_PARA_ALERTAR && estado.isOnline) {
       estado.isOnline = false;
       estado.ultimaCaida = new Date();
-      await avisar(client, modalidad, false);
+      transicion = "caida";
     }
   } else {
     if (!estado.isOnline) {
-      await avisar(client, modalidad, true);
+      transicion = "recuperado";
     }
     estado.isOnline = true;
     estado.fallosSeguidos = 0;
   }
 
   await estado.save();
-  return { ...modalidad, enLinea, jugadores };
+  return { ...modalidad, enLinea, jugadores, transicion };
 }
 
-async function avisar(client, modalidad, recuperado) {
-  const canal = await client.channels.fetch(client.config.mcMonitor.alertChannelId).catch(() => null);
-  if (!canal) return;
+function construirEmbedEstado(resultados) {
+  const todasEnLinea = resultados.every((r) => r.enLinea);
 
   const embed = new EmbedBuilder()
-    .setTitle(recuperado ? `✅ ${modalidad.nombre} se recuperó` : `🔴 ${modalidad.nombre} está caída`)
-    .setDescription(
-      recuperado
-        ? `La modalidad **${modalidad.nombre}** (${modalidad.host}:${modalidad.port}) volvió a responder.`
-        : `La modalidad **${modalidad.nombre}** (${modalidad.host}:${modalidad.port}) dejó de responder.`,
-    )
-    .setColor(recuperado ? "Green" : "Red")
+    .setTitle(`${emojis.lume} Estado de las modalidades`)
+    .setColor(todasEnLinea ? "Green" : "Red")
+    .setFooter({ text: "Estado de Modalidades" })
     .setTimestamp();
 
-  await canal.send({ content: recuperado ? undefined : "@here", embeds: [embed] });
+  for (const r of resultados) {
+    embed.addFields({
+      name: `${r.enLinea ? `${emojis.success}` : `${emojis.warn}`} ${r.nombre}`,
+      value: r.enLinea
+        ? `En línea${r.jugadores ? `\n${r.jugadores.online}/${r.jugadores.max} jugadores` : ""}`
+        : `Sin respuesta`,
+      inline: true,
+    });
+  }
+
+  return embed;
+}
+
+async function actualizarEmbedEstado(client, canal, resultados) {
+  const embed = construirEmbedEstado(resultados);
+  const registro = await EstadoEmbed.findOne();
+
+  if (registro) {
+    const mensaje = await canal.messages.fetch(registro.messageId).catch(() => null);
+    if (mensaje) {
+      await mensaje.edit({ embeds: [embed] });
+      return;
+    }
+  }
+
+  const nuevoMensaje = await canal.send({ embeds: [embed] });
+  await EstadoEmbed.findOneAndUpdate({}, { channelId: canal.id, messageId: nuevoMensaje.id }, { upsert: true });
+}
+
+async function avisarTransiciones(canal, resultados) {
+  const transiciones = resultados.filter((r) => r.transicion);
+  if (!transiciones.length) return;
+
+  const lineas = transiciones.map((r) =>
+    r.transicion === "caida" ? `${emojis.warn} - **${r.nombre}** está caída.` : `${emojis.success} - **${r.nombre}** se recuperó.`,
+  );
+
+  const hayNuevasCaidas = transiciones.some((r) => r.transicion === "caida");
+
+  await canal.send({
+    content: `${hayNuevasCaidas ? "@here " : ""}${lineas.join("\n")}`,
+  });
 }
 
 async function verificarModalidades(client) {
   const modalidades = client.config.mcMonitor?.modalidades || [];
   if (!modalidades.length) return [];
 
-  return Promise.all(modalidades.map((m) => revisarModalidad(client, m)));
+  const canal = await client.channels.fetch(client.config.mcMonitor.alertChannelId).catch(() => null);
+  if (!canal) {
+    console.warn("[mcMonitor] No se pudo encontrar el canal configurado en MC_MONITOR_ALERT_CHANNEL_ID.");
+    return [];
+  }
+
+  const resultados = await Promise.all(modalidades.map((m) => revisarModalidad(client, m)));
+
+  await actualizarEmbedEstado(client, canal, resultados);
+  await avisarTransiciones(canal, resultados);
+
+  return resultados;
 }
 
 function iniciarMonitorDeServidores(client) {
@@ -75,7 +126,7 @@ function iniciarMonitorDeServidores(client) {
 
   verificarModalidades(client);
   setInterval(() => verificarModalidades(client), intervalo);
-  console.log(`[mcMonitor] Monitor de modalidades iniciado.`);
+  console.log(`[mcMonitor] Monitor de modalidades iniciado (cada ${intervalo / 1000}s).`);
 }
 
 module.exports = { iniciarMonitorDeServidores, verificarModalidades };

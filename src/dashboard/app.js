@@ -8,6 +8,7 @@ const membersRoutes = require("./routes/member");
 const moderationRoutes = require("./routes/moderation");
 const sanctionsRoutes = require("./routes/sanctions");
 const { MongoStore } = require("connect-mongo");
+const serverStatusRoutes = require("./routes/serverStatus");
 
 module.exports = function initDashboard(app, client) {
   if (!client.config.dashboard.ClientSecret || !client.config.dashboard.sessionSecret || !client.config.dashboard.guildId) {
@@ -36,6 +37,7 @@ module.exports = function initDashboard(app, client) {
   app.use("/api/members", membersRoutes(client, requireStaff));
   app.use("/api/moderation", moderationRoutes(client, requireStaff));
   app.use("/api/sanctions", sanctionsRoutes(client, requireStaff));
+  app.use("/api/server-status", serverStatusRoutes(client, requireStaff));
 
   app.get("/api/me", (req, res) => {
     if (!req.session.user) return res.status(401).json({ error: "No autenticado." });

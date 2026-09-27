@@ -4,6 +4,20 @@ const Reporte = require("../../schema/reports");
 
 const ESTADOS_VALIDOS = ["Pendiente", "Aceptado", "Denegado", "Resuelto"];
 
+async function obtenerEvidenciaFresca(client, rep) {
+  if (!rep.evidenceChannelId || !rep.evidenceMessageId) {
+    return rep.evidence;
+  }
+
+  try {
+    const canal = await client.channels.fetch(rep.evidenceChannelId);
+    const mensaje = await canal.messages.fetch(rep.evidenceMessageId);
+    return mensaje.attachments.first()?.url || rep.evidence;
+  } catch {
+    return rep.evidence;
+  }
+}
+
 module.exports = function reportsRoutes(client, requireStaff) {
   const router = express.Router();
   const guard = requireStaff(client);
@@ -11,19 +25,24 @@ module.exports = function reportsRoutes(client, requireStaff) {
   router.get("/", guard, async (req, res) => {
     const reportes = await Reporte.find({}).sort({ timestamp: -1 }).limit(100).lean();
 
-    const tags = await Promise.all(
+    const enriquecidos = await Promise.all(
       reportes.map(async (rep) => {
-        const reporter = await client.users.fetch(rep.userId).catch(() => null);
-        
+        const [reportero, evidenciaFresca] = await Promise.all([
+          client.users.fetch(rep.userId).catch(() => null),
+          obtenerEvidenciaFresca(client, rep),
+        ]);
+
         return {
           ...rep,
-          reporterTag: reporter ? reporter.tag : "ID desconocido (${rep.userId})",
-          reporterAvatar: reporter ? reporter.displayAvatarURL({ size: 64,dynamic: true }) : null,
+          reporterTag: reportero ? reportero.tag : `ID desconocido (${rep.userId})`,
+          reporterAvatar: reportero ? reportero.displayAvatarURL({ size: 64 }) : null,
+          evidence: evidenciaFresca,
         };
-      })
-    )
-      res.json(tags); 
-   });
+      }),
+    );
+
+    res.json(enriquecidos);
+  });
 
   router.patch("/:reportId", guard, async (req, res) => {
     const { status, staffAction } = req.body;

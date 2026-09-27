@@ -84,6 +84,8 @@ module.exports = {
             mcUser: usuario,
             reason: reporte,
             evidence: evidenciaPerma,
+            evidenceChannelId: mensajeReporte.channelId,
+            evidenceMessageId: mensajeReporte.id,
             link: link
         });
 
