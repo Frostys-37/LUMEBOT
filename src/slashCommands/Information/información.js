@@ -8,7 +8,9 @@ module.exports = {
   category: "Information",
 
   run: async (client, interaction) => {
-    const msg = await interaction.deferReply({ fetchReply: true });
+    const msg = await interaction.deferReply({
+          flags: [MessageFlags.fetchReply],
+        });
 
     const modalidades = await obtenerEstadoDetallado(client);
 

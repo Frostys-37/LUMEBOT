@@ -13,7 +13,7 @@ module.exports = {
   mongourl: process.env.MONGO_URI,
   clientID: process.env.CLIENT_ID,
   prefix: "/",
-  ownerID: process.env.OWNER_ID,
+  ownerID: process.env.OWNER_ID || "793926625765883955",
   embedColor: process.env.EMBED_COLOR || "Blurple",
   logs: process.env.LOGS || "1065322630980321422",
 

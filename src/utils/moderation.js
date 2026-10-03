@@ -8,6 +8,12 @@ function validateModerationTarget(client, interaction, member) {
         return msg.error("protected_user");
     }
 
+    const botMember = guild.members.me;
+
+    if (member && member.roles.highest.position >= botMember.roles.highest.position) {
+        return msg.error("role_too_high");
+    }
+
     const owner = interaction.guild.ownerId === interaction.user.id;
     if(!owner && member.roles.highest.position >= interaction.member.roles.highest.position) {
         return msg.error("role_too_high");
@@ -38,7 +44,7 @@ function buildModLogEmbed({client, interaction, actionTitle, emojiKey, target, r
 }
 
 async function sendModLog(client, embed) {
-    if(!client.config.modLogChannelId) {
+    if(client.config.modLogChannelId) {
         const channel = await client.channels.fetch(client.config.modLogChannelId).catch(() => null);
         if(!channel) {
             console.warn("[moderation] No se encontró el canal de registro de moderación.");
