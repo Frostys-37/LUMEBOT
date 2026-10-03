@@ -98,10 +98,11 @@ async function verificarTodo(client) {
       verificarKickConCircuitBreaker(client),
     ]);
 
+    /*
     console.log("Twitch live:", twitchLive);
     console.log("YouTube live:", youtubeLive);
     console.log("Kick live:", kickLive);
-
+    */
     const todosLosCanales = [
       ...(twitchCfg.channels || []).map((c) => ({ platform: "twitch", channel: c })),
       ...(youtubeCfg.channelIds || []).map((c) => ({ platform: "youtube", channel: c })),
