@@ -44,6 +44,7 @@ module.exports = function moderationRoutes(client, requireStaff) {
       channel: { name: "Dashboard Lumebot" },
     };
 
+    
     const botMember = guild.members.me;
 
     if (fakeInteraction.member) {
@@ -53,9 +54,6 @@ module.exports = function moderationRoutes(client, requireStaff) {
             "[dashboard] No puedo aplicar la acción a este usuario porque su rol es igual o superior al del bot.",
         });
       }
-
-      const error = validateModerationTarget(fakeInteraction, client, member);
-      if (error) return res.status(403).json({ error });
     }
 
     try {

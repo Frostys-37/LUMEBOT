@@ -16,6 +16,8 @@ module.exports = {
       client.user.setActivity(status, { type: Activity.Playing });
     }, 10000);
 
+  if(client.config.dashboard.enabled) {
+
     const app = express();
     const iniciado = initDashboard(app, client);
 
@@ -27,6 +29,6 @@ module.exports = {
         );
       });
     }
-
+  }
   },
 };

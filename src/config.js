@@ -40,11 +40,12 @@ module.exports = {
 
   //DASHBOARD
   dashboard: {
+    enabled: process.env.DASHBOARD_ENABLED === "true",
     port: process.env.DASHBOARD_PORT || 8080,
     url: process.env.DASHBOARD_URL || "http://localhost:8080",
-    guildId: process.env.DASHBOARD_GUILD_ID || "793492909189365761",
+    guildId: process.env.DASHBOARD_GUILD_ID,
     ClientSecret: process.env.DISCORD_OAUTH_CLIENT_SECRET || "",
-    sessionSecret: process.env.DASHBOARD_SESSION_SECRET || "5e3f8c9a-1b2c-4d6e-9f3a-2b1c4d5e6f7g",
+    sessionSecret: process.env.DASHBOARD_SESSION_SECRET,
   },
 
   // STREAMS

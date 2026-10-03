@@ -28,7 +28,12 @@ module.exports = function initDashboard(app, client) {
       collectionName: "dashboard_sessions",
       ttl: 60 * 60 * 8,
     }),
-    cookie: { httpOnly: true, maxAge: 1000 * 60 * 60 * 8 },
+    cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 1000 * 60 * 60 * 8
+},
   }),
 );
 
