@@ -1,6 +1,6 @@
-const { EmbedBuilder, MessageFlags, version, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
-const axios = require("axios");
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const emojis = require("../../emojis.json");
+const { obtenerEstadoDetallado } = require("../../services/serverMonitor/estado");
 
 module.exports = {
   name: "info",
@@ -10,28 +10,22 @@ module.exports = {
   run: async (client, interaction) => {
     const msg = await interaction.deferReply({ fetchReply: true });
 
-    const ipServidor = "mc.lumecraft.net"; 
+    const modalidades = await obtenerEstadoDetallado(client);
 
-    let mcStatus = "Desconocido";
-    let playersInfo = "0/0";
-    let versionMC = "N/A";
+    const lineasModalidades = modalidades.length
+      ? modalidades
+          .map((m) => {
+            const estadoEmoji = m.online ? (emojis.succes || "🟢") : (emojis.error || "🔴");
 
-    try {
-        const response = await axios.get(`https://api.mcstatus.io/v2/status/java/${ipServidor}`);
-        const data = response.data;
+            if (!m.online) {
+              return `${estadoEmoji} **${m.nombre}:** Sin respuesta`;
+            }
 
-        if (data.online) {
-            mcStatus = `${emojis.succes || "🟢"} **Online**`;
-            playersInfo = `\`${data.players.online}/${data.players.max}\``;
-            versionMC = `\`${data.version.name_clean}\``;
-        } else {
-            mcStatus = `${emojis.error || "🔴"} **Offline**`;
-            playersInfo = "`0/0`";
-            versionMC = "`N/A`";
-        }
-    } catch (e) {
-        mcStatus = `${emojis.warn || "⚠️"} **Error al conectar**`;
-    }
+            const jugadores = m.jugadores ? `${m.jugadores.online}/${m.jugadores.max}` : "N/A";
+            return `${estadoEmoji} **${m.nombre}:** \`${jugadores}\` jugadores${m.ping != null ? ` • ${m.ping}ms` : ""}`;
+          })
+          .join("\n")
+      : "No hay modalidades configuradas para monitorear.";
 
     const ping = msg.createdTimestamp - interaction.createdTimestamp;
     const apiPing = client.ws.ping;
@@ -39,43 +33,25 @@ module.exports = {
 
     const embed = new EmbedBuilder()
       .setTitle(`${emojis.user || "ℹ️"} | Panel de Información Lumecraft`)
-      .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
+      .setThumbnail(client.user.displayAvatarURL())
       .setColor(client.embedColor || "Blue")
+      .setDescription(`Conéctate en \`mc.lumecraft.net\``)
       .addFields(
-        { 
-          name: "🎮 Servidor Minecraft", 
-          value: `**Estado:** ${mcStatus}\n**Jugadores:** ${playersInfo}\n**Versión:** ${versionMC}`, 
-          inline: false 
-        },
-        { 
-          name: `${emojis.ping || "🤖"} Latencia Bot`, 
-          value: `**Bot:** \`${ping}ms\`\n**API:** \`${apiPing}ms\``, 
-          inline: true 
-        },
-        { 
-          name: `${emojis.reloj || "⏳"} Actividad`, 
-          value: `\`${uptime}\``, 
-          inline: true 
-        },
-        { 
-          name: "📊 Comunidad", 
-          value: `**Usuarios:** \`${client.users.cache.size}\` miembros`, 
-          inline: true 
-        }
+        { name: "🎮 Modalidades", value: lineasModalidades, inline: false },
+        { name: `${emojis.ping || "🤖"} Latencia Bot`, value: `**Bot:** \`${ping}ms\`\n**API:** \`${apiPing}ms\``, inline: true },
+        { name: `${emojis.reloj || "⏳"} Actividad`, value: `\`${uptime}\``, inline: true },
+        { name: "📊 Comunidad", value: `**Usuarios:** \`${client.users.cache.size}\` miembros`, inline: true },
       )
       .setFooter({ text: `LUMECRAFT NETWORK`, iconURL: client.user.avatarURL() })
       .setTimestamp();
 
     const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-            .setLabel('Tienda')
-            .setStyle(ButtonStyle.Link)
-            .setURL('https://tienda.lumecraft.net/'),
+      new ButtonBuilder().setLabel("Tienda").setStyle(ButtonStyle.Link).setURL("https://tienda.lumecraft.net/"),
     );
 
     await interaction.editReply({
       embeds: [embed],
-      components: [row]
+      components: [row],
     });
   },
 };
