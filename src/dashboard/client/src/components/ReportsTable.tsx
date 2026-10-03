@@ -94,7 +94,7 @@ export function ReportsTable() {
           {reportes.map((rep) => {
             const borrador = borradores[rep.reportId] ?? { status: rep.status, staffAction: "" };
             return (
-              <div key={rep._id} className="bg-neu-bg rounded-2xl p-5 shadow-neu">
+              <div key={rep._id} className="bg-discord-bg rounded-2xl p-5 shadow-neu">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <div className="text-center">
@@ -129,7 +129,7 @@ export function ReportsTable() {
 
                 <div className="flex flex-col md:flex-row gap-3 mt-4">
                   <select
-                    className="bg-neu-bg shadow-neu-inset-sm rounded-xl px-3 py-2 text-sm text-neu-text focus:outline-none"
+                    className="bg-neu-bg shadow-neu-inset-sm rounded-xl px-3 py-2 text-sm text-neu-text focus:outline-none [color-scheme:dark]"
                     value={borrador.status}
                     onChange={(e) => actualizarBorrador(rep.reportId, { status: e.target.value as EstadoReporte })}
                   >
@@ -142,7 +142,7 @@ export function ReportsTable() {
                   <textarea
                     rows={1}
                     placeholder="Sanción / acción tomada (ej: 'Muteado 1h')..."
-                    className="flex-1 bg-neu-bg shadow-neu-inset-sm rounded-xl px-3 py-2 text-sm text-neu-text focus:outline-none resize-none"
+                    className="flex-1 bg-neu-bg shadow-neu-inset-sm rounded-xl px-3 py-2 text-sm text-neu-text focus:outline-none resize-none [color-scheme:dark]"
                     value={borrador.staffAction}
                     onChange={(e) => actualizarBorrador(rep.reportId, { staffAction: e.target.value })}
                   />

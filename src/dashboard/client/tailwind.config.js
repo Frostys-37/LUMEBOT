@@ -6,7 +6,7 @@ export default {
         sans: ["Inter", "system-ui", "sans-serif"],
       },
       colors: {
-        discord: {
+        neu: {
           bg: "#2c2f36",
           text: "#d5d8e0",
           muted: "#8a8f9a",
