@@ -79,7 +79,7 @@ module.exports = {
             });
 
         } catch (error) {
-            console.error(error);
+            client.logger.log(`[sugerencia] Error al procesar la sugerencia: ${error}`, "error");
             await interaction.editReply({ content: "Hubo un error al procesar tu sugerencia." });
         }
     }

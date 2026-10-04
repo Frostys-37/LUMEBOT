@@ -51,7 +51,7 @@ module.exports = {
       await interaction.editReply({ embeds: [embed] });
       await sendModLog(client, embed);
     } catch (err) {
-      console.error(err);
+      client.logger.log(`[timeout] Error al silenciar al usuario: ${err}`, "error");
       await interaction.editReply({ content: msg.error("unknown_command_error") });
     }
   },

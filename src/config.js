@@ -16,6 +16,7 @@ module.exports = {
   ownerID: process.env.OWNER_ID || "793926625765883955",
   embedColor: process.env.EMBED_COLOR || "Blurple",
   logs: process.env.LOGS || "1065322630980321422",
+  geminiApiKey: process.env.GEMINI_API_KEY,
 
   guildIds: parseList(process.env.GUILD_IDS),
 
@@ -28,6 +29,7 @@ module.exports = {
   videoPublicChannelId: process.env.VIDEO_PUBLIC_CHANNEL_ID,
   welcomeChannelId: process.env.WELCOME_CHANNEL_ID,
   memberRoleId: process.env.MEMBER_ROLE_ID,
+  autoModLogChannelId: process.env.AUTOMOD_LOG_CHANNEL_ID,
 
   // TICKETS
   ticketPanelChannelId: process.env.TICKET_PANEL_CHANNEL_ID,

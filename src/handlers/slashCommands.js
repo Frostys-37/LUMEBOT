@@ -12,15 +12,17 @@ module.exports = (client) => {
       const slashCommand = require(`../slashCommands/${dir}/${file}`);
 
       if (!slashCommand.name)
-        return console.error(
-          `slashCommandNameError: el nombre del comando es obligatorio.`
+        return client.logger.log(
+          `[slashCommands] slashCommandNameError: el nombre del comando es obligatorio.`,
+          "error"
         );
 
       if (!slashCommand.description)
-        return console.error(
-          `slashCommandDescriptionError: ${
+        return client.logger.log(
+          `[slashCommands] slashCommandDescriptionError: ${
             slashCommand.split(".")[0]
-          } descripcion es obligatoria.`
+          } descripcion es obligatoria.`,
+          "error"
         );
 
       client.slashCommands.set(slashCommand.name, slashCommand);
@@ -44,7 +46,7 @@ module.exports = (client) => {
   (async () => {
     try {
 
-      const servidores = ["793492909189365761"];
+      const servidores = ["793492909189365761", "738909505861058580"];
       
       for (const servidor of servidores) {
         await rest.put(Routes.applicationGuildCommands(client.config.clientID, servidor), {
@@ -52,11 +54,11 @@ module.exports = (client) => {
         });
       }
       client.logger.log(
-        "SlashCommands actualizados (/).",
+        `[slashCommands] SlashCommands actualizados (/).`,
         "cmd"
       );
     } catch (error) {
-      console.error(error);
+      client.logger.log(`[slashCommands] Error al actualizar SlashCommands: ${error}`, "error");
     }
   })();
 };

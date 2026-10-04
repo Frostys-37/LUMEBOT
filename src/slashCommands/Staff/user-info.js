@@ -76,7 +76,7 @@ module.exports = {
             await interaction.editReply({ embeds: [embed] });
 
         } catch (error) {
-            console.error(error);
+            client.logger.log(`[user-info] Error al consultar el expediente del usuario: ${error}`, "error");
             await interaction.editReply({ content: "Hubo un error al consultar el expediente del usuario." });
         }
     }

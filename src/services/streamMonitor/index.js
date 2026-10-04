@@ -32,7 +32,7 @@ async function anunciar(client, stream) {
   }
 
   await canalAnuncio.send({
-    content: `${emj || "📢"} ¡**${stream.channelName || stream.channel}** está en vivo en ${NOMBRES[stream.platform]}! ${stream.url}`,
+    content: `${emj || "📢"} ¡**${stream.channelName || stream.channel}** está en vivo en ${NOMBRES[stream.platform]}! ${stream.url}\n||@here||`,
     embeds: [embed],
   });
 }

@@ -109,7 +109,7 @@ client.on("interactionCreate", async (interaction) => {
       if (toAdd.length) await member.roles.add(toAdd);
       if (toRemove.length) await member.roles.remove(toRemove);
     } catch (err) {
-      console.error("[autorol] Error al actualizar roles:", err);
+      client.logger.log(`[autorol] Error al actualizar roles: ${err}`, "error");
       return interaction.editReply("No pude actualizar tus roles. Avisa a mi desarrollador: @frosty_god.");
     }
 

@@ -22,20 +22,20 @@ module.exports = {
           reason: "Usuario baneado por pertenecer a blacklist de usuarios.",
         });
         client.channels.cache
-          .get("765010962347851807")
+          .get(client.config.reportStaffChannelId)
           .send(
             `El usuario ${member.user.tag} ha intentado entrar al servidor.`,
           );
         return;
       }
     } catch (error) {
-      console.error("Error al banear al usuario:", error);
+      client.logger.log(`[guildMemberAdd] Error al banear al usuario: ${error}`, "error");
     }
 
-    console.log(member + " Se unió");
+   // console.log(member + " Se unió");
 
-    await member.roles.add("1556093760901873664").catch((error) => {
-      console.error("Error al asignar rol de bienvenida:", error);
+    await member.roles.add(client.config.memberRoleId).catch((error) => {
+      client.logger.log(`[guildMemberAdd] Error al asignar rol de bienvenida: ${error}`, "error");
     });
 
     const embed_servidor = new Discord.EmbedBuilder()
@@ -70,7 +70,7 @@ module.exports = {
         embed_servidor.setImage("attachment://bienvenida.gif");
         embed_md.setImage("attachment://bienvenida.gif");
     } catch (error) {
-        console.error("Error al generar el GIF de bienvenida:", error);
+        client.logger.log(`[guildMemberAdd] Error al generar el GIF de bienvenida: ${error}`, "error");
     }
 
     const channel = client.channels.cache.get(client.config.welcomeChannelId)
@@ -80,7 +80,7 @@ module.exports = {
         files: files,
       });
     member.user.send({ embeds: [embed_md], files: files }).catch((error) => {
-        console.error("Error al enviar el mensaje privado:", error);
+        client.logger.log(`[guildMemberAdd] Error al enviar el mensaje privado: ${error}`, "error");
     });
   },
 };

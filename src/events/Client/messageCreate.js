@@ -104,7 +104,7 @@ module.exports = {
         try {
             command.execute(message, args, client);
         } catch (error) {
-            client.logger.log(`[commands] Error al ejecutar comando: ${error.message}`, "error");
+            client.logger.log(`[messageCreate] Error al ejecutar comando: ${error.message}`, "error");
             embed.setDescription("Ha ocurrido un error con este comando.\nHe contactado con mi dev para solucionarlo!.");
             return message.channel.send({ embeds: [embed] });
         }

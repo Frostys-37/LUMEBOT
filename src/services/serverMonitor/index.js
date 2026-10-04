@@ -94,7 +94,7 @@ async function avisarTransiciones(canal, resultados) {
   const hayNuevasCaidas = transiciones.some((r) => r.transicion === "caida");
 
   await canal.send({
-    content: `${hayNuevasCaidas ? "@here " : ""}${lineas.join("\n")}`,
+    content: `${hayNuevasCaidas ? "" : ""}${lineas.join("\n")}`,
   });
 }
 

@@ -39,7 +39,7 @@ module.exports = {
 
       await data.save();
     } catch (err) {
-      console.error(err);
+      client.logger.log(`[warn] Error al guardar la advertencia: ${err}`, "error");
       return interaction.editReply({ content: msg.error("db_save_error") });
     }
 
