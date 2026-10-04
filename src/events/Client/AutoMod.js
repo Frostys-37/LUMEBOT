@@ -1,29 +1,32 @@
 const { EmbedBuilder, Message, Client, PermissionsBitField } = require("discord.js");
-const Discord = require("discord.js")
-const emojis = require("../../emojis.json")
+const emojis = require("../../emojis.json");
 
 module.exports = {
     name: "messageCreate",
     /**
-     * 
      * @param {Client} client 
      * @param {Message} message 
-     * @returns 
      */
     run: async (client, message) => {
+        if (message.author.bot || !message.guild) return;
 
-        if (message.author.bot) return;
-        if(!message.guild) return;
-        
-        const DISCORD_INVITE_REGEX = /(https)*(http)*:*(\/\/)*discord(.gg|app.com\/invite)\/[a-zA-Z0-9]{1,}/i;
+        const DISCORD_INVITE_REGEX = /(https?:\/\/)?(www\.)?(discord\.(gg|io|me|li)|discord(app)?\.com\/invite)\/[a-zA-Z0-9-]+/gi;
 
-        const spamWarnings = new Set();
-        const textInNoTextWarnings = new Set();
+        if (DISCORD_INVITE_REGEX.test(message.content)) {
+            if (message.member.permissions.has(PermissionsBitField.Flags.ManageMessages)) return;
 
-        if(DISCORD_INVITE_REGEX.test(message.content)) {
-            if(message.member.permissions.has("ManageMessages")) return;
-            message.delete()
-            message.guild.members.kick(message.author.id, {reason: "Expulsado por AutoMod (invitaciones)"})
+            await message.delete().catch(() => {});
+
+            if (message.member.kickable) {
+                await message.member.kick("Expulsado por AutoMod (invitaciones)").catch(() => {});
+            }
+
+            const logChannel = message.guild.channels.cache.get(client.config.autoModLogChannelId);
+            if (logChannel) {
+                logChannel.send({ 
+                    content: `${emojis.warn} | ${message.author} ha sido expulsado por enviar un enlace de invitación de Discord.\n**Mensaje:** ${message.content}`, 
+                }).catch(() => {});
+            }
         }
     }
-}
+};

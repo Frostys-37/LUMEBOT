@@ -1,6 +1,7 @@
 const { CommandInteraction, Client, ApplicationCommandOptionType } = require("discord.js");
 const Discord = require("discord.js");
 const emojis = require("./../../emojis.json");
+
 module.exports = {
     name: "contra",
     description: "¿Quieres restablecer la contraseña de tu usuario?.",

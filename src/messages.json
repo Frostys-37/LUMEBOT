@@ -1,0 +1,35 @@
+{
+  "errors": {
+    "no_user": "No has mencionado a un usuario.",
+    "no_reason": "Proporciona la razón de la sanción.",
+    "no_time": "No has proporcionado un tiempo válido.",
+    "invalid_duration": "El tiempo debe ser entre {{min}} y {{max}}.",
+    "role_too_high": "El usuario tiene un rol igual o más alto que el tuyo.",
+    "protected_user": "No puedes ejecutar esta acción sobre mi desarrollador.",
+    "missing_bot_perms": "No tengo permisos suficientes para realizar esta acción.",
+    "missing_user_perms": "No tienes el permiso `{{perm}}` para ejecutar este comando.",
+    "db_save_error": "Ocurrió un error al guardar la información en la base de datos.",
+    "db_read_error": "Hubo un error al conectar con la base de datos.",
+    "unknown_command_error": "Ha ocurrido un error desconocido al ejecutar el comando.",
+    "no_permission_component": "No puedes usar este menú/botón.",
+    "report_not_found": "No encontré ningún reporte con esa ID.",
+    "no_sanciones": "No hay sanciones registradas en la base de datos.",
+    "no_warns": "El usuario **{{user}}** no cuenta con advertencias registradas.",
+    "channel_not_found": "No se encontró el canal configurado.",
+    "cooldown_active": "Ya has enviado una sugerencia hoy. Podrás enviar otra en **{{time}}**.",
+    "invalid_link": "El enlace debe empezar con https://",
+    "missing_args": "Faltan argumentos, por favor revisa el comando e intenta de nuevo.",
+    "no_active_ban": "Este usuario no tiene un ban activo en el servidor.",
+    "user_left_guild": "No pude encontrar a ese usuario en el servidor."
+  },
+  "success": {
+    "banned": "Usuario Baneado del Servidor",
+    "kicked": "Usuario Expulsado del Servidor",
+    "unbanned": "Usuario Desbaneado del Servidor",
+    "muted": "Usuario Silenciado en el servidor",
+    "warned": "Usuario Advertido",
+    "report_sent": "Reporte enviado correctamente, gracias. ID del reporte: {{id}}\n\nCuando sea revisado y evaluado, nos pondremos en contacto contigo.",
+    "suggestion_sent": "Tu sugerencia ha sido enviada.",
+    "action_registered": "Acción registrada para el reporte #{{id}}"
+  }
+}

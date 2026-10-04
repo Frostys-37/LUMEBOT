@@ -1,104 +1,76 @@
-const { ApplicationCommandOptionType, ButtonStyle, MessageFlags } = require(`discord.js`)
-const Discord = require(`discord.js`)
-const emojis = require("./../../emojis.json")
+const { ApplicationCommandOptionType, ButtonStyle, MessageFlags } = require("discord.js");
+const Discord = require("discord.js");
+const emojis = require("./../../emojis.json");
+
 module.exports = {
     name: "video",
-    description: `Manda tu contenido al servidor.`,
+    description: "Manda tu contenido al servidor.",
     usage: "/video <enlace>",
-    userPrems: [`SendMessages`],
+    userPrems: ["SendMessages"],
     category: "Utility",
     options: [
         {
             name: "enlace",
-            description: `Coloca tu contenido, Tik Tok, YouTube, Twitch, etc, todo lo que tenga que ver con Lumecraft.`,
+            description: "Coloca tu contenido (TikTok, YouTube, Twitch, etc.).",
             type: ApplicationCommandOptionType.String,
             required: true
-
         }
     ],
 
     /**
-     *
      * @param {LUMEBOT} client
      * @param {CommandInteraction} interaction
      */
-
     run: async (client, interaction) => {
-        await interaction.deferReply({
-            flags: [MessageFlags.Ephemeral]
-        });
+        await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
-        const link = interaction.options.getString("enlace")
-        if (!link) return interaction.editReply({ content: "Necesito el enlace.", flags: [MessageFlags.Ephemeral] })
+        const link = interaction.options.getString("enlace");
 
-        if(!link.startsWith("https://")) return interaction.editReply({ content: "El enlace debe empezar con https://", flags: [MessageFlags.Ephemeral] })
+        if (!link.startsWith("https://")) {
+            return interaction.editReply({
+                content: "El enlace debe empezar con `https://`",
+                flags: [MessageFlags.Ephemeral]
+            });
+        }
 
         const embed = new Discord.EmbedBuilder()
-            .setTitle("<:youtube:889898858518290523> | Contenido de Usuario")
-            .setAuthor({ name: `${interaction.user.username}`, iconURL: interaction.user.displayAvatarURL({ dynamic: true }) })
+            .setTitle(`${emojis.youtube || "🎥"} | Contenido de Usuario`)
+            .setAuthor({ name: interaction.user.username, iconURL: interaction.user.displayAvatarURL() })
             .addFields(
-                { name: `${emojis.user} | Usuario:`, value: `${interaction.user}` },
-                { name: `<:links:992879858042552360> | Enlace`, value: `${link}` },
+                { name: `${emojis.user || "👤"} | Usuario:`, value: `${interaction.user}` },
+                { name: `${emojis.link || "🔗"} | Enlace:`, value: link }
             )
-            .setFooter({ text: "Sistema de Videos", iconURL: interaction.user.displayAvatarURL({ dynamic: true }) })
+            .setFooter({ text: "Sistema de Videos", iconURL: interaction.user.displayAvatarURL() })
             .setTimestamp()
-            .setColor(client.embedColor)
+            .setColor(client.embedColor || "Blurple");
 
-        const btnaccept = new Discord.ButtonBuilder()
-            .setCustomId("succes")
-            .setLabel('Aceptado')
+        const btnAccept = new Discord.ButtonBuilder()
+            .setCustomId("video_accept")
+            .setLabel("Aceptar")
             .setStyle(ButtonStyle.Success)
-            .setEmoji("855695983094267904")
+            .setEmoji("855695983094267904");
 
-        const btndenied = new Discord.ButtonBuilder()
-            .setCustomId("denied")
-            .setLabel('Denegado')
+        const btnDeny = new Discord.ButtonBuilder()
+            .setCustomId("video_deny")
+            .setLabel("Denegar")
             .setStyle(ButtonStyle.Danger)
-            .setEmoji("855703357238935592")
+            .setEmoji("855703357238935592");
 
-        const row = new Discord.ActionRowBuilder()
-            .addComponents(btnaccept)
-            .addComponents(btndenied);
+        const row = new Discord.ActionRowBuilder().addComponents(btnAccept, btnDeny);
 
-        const li = new Discord.ActionRowBuilder()
-            .addComponents(new Discord.ButtonBuilder()
-                .setURL(link)
-                .setLabel('Ve al vídeo!')
-                .setStyle(ButtonStyle.Link));
+        const staffChannel = await client.channels.fetch(client.config.videoStaffChannelId).catch(() => null);
+        if (!staffChannel) {
+            return interaction.editReply({
+                content: "No se pudo encontrar el canal del Staff para enviar el video.",
+                flags: [MessageFlags.Ephemeral]
+            });
+        }
 
-        const staffChannel = await client.channels.fetch("865406316889636864");
-        const msgStaff = await staffChannel.send({ embeds: [embed], components: [row] })
+        await staffChannel.send({ embeds: [embed], components: [row] });
 
-        await interaction.editReply({ content: "Tu vídeo ha sido enviado al equipo de moderación, pronto lo revisarán.", flags: [MessageFlags.Ephemeral] })
-
-        let ids = [
-            "535945446087065621",//ale
-            "857874928534814720",//tama
-            "793926625765883955",//Yo god
-            "536007600362356737",//Ana
-            "756763855379628102"//Cobra
-        ]
-
-        const filter = i => ["succes", "denied"].includes(i.customId) && ids.includes(i.user.id);
-        const collector = staffChannel.createMessageComponentCollector({ filter, time: 86400000 });
-
-        collector.on('collect', async i => {
-            i.deferUpdate()
-
-            if (i.customId === 'succes') {
-              
-                const publicChannel = await client.channels.fetch("866062547819429908");
-                await publicChannel.send({ content: "Video Aceptado", embeds: [embed], components: [li] })
-                
-                await msgStaff.edit({ content: `${emojis.succes} | Aceptado por ${i.user.tag}`, components: [] });
-                collector.stop();
-
-            }
-
-            if (i.customId === "denied") {
-                await msgStaff.edit({ content: `${emojis.error} | Denegado por ${i.user.tag}`, components: [] });
-                collector.stop();
-            }
-        })
+        await interaction.editReply({
+            content: "Tu vídeo ha sido enviado al equipo de moderación, pronto lo revisarán.",
+            flags: [MessageFlags.Ephemeral]
+        });
     }
-}
+};

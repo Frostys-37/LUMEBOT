@@ -55,42 +55,48 @@ module.exports = {
         if (!usuario || !reporte || !img) return interaction.editReply({ content: "Faltan argumentos, por favor revisa el comando e intenta de nuevo.", flags: [MessageFlags.Ephemeral] })
 
         const reporteId = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const nombreArchivo = img.name || "evidencia.png"
+
+        const staffChannel = await client.channels.fetch(client.config.reportStaffChannelId);
+
+        const embedStaff = new Discord.EmbedBuilder()
+            .setTitle(`${emojis.report} | Nuevo Reporte`)
+            .setFields(
+                { name: `${emojis.user} | Reporte enviado por:`, value: `${interaction.user} - ${interaction.user.id}` },
+                { name: `${emojis.user} | Usuario Minecraft:`, value: `${usuario}` },
+                { name: `${emojis.reportmsg} | Reporte:`, value: `${reporte}` },
+                { name: `${emojis.link} | Enlace:`, value: `${link}\n(¡Ten cuidado con los enlaces que abres!)` },
+                { name: `${emojis.report_user} | ID del Reporte:`, value: `${reporteId}` }
+            )
+            .setImage(`attachment://${nombreArchivo}`)
+            .setColor(client.embedColor)
+            .setTimestamp()
+            .setFooter({ text: "Sistema de Reportes", iconURL: client.user.avatarURL() })
+
+
+        const mensajeReporte = await staffChannel.send({ embeds: [embedStaff], files: [{attachment: img.url, name: nombreArchivo }]})
+
+        const evidenciaPerma = mensajeReporte.attachments.first()?.url || img.url;
 
         const nuevoReporte = new (require("./../../schema/reports"))({
             reportId: reporteId,
             userId: interaction.user.id,
             mcUser: usuario,
             reason: reporte,
-            evidence: img.url,
+            evidence: evidenciaPerma,
+            evidenceChannelId: mensajeReporte.channelId,
+            evidenceMessageId: mensajeReporte.id,
             link: link
         });
 
         await nuevoReporte.save();
 
-        const embedStaff = new Discord.EmbedBuilder()
-            .setTitle(`${emojis.report} | Nuevo Reporte`)
-            .setFields(
-                { name: `${emojis.user} | Usuario Discord:`, value: `${interaction.user} - ${interaction.user.id}` },
-                { name: `${emojis.user} | Usuario Minecraft:`, value: `${usuario}` },
-                { name: `${emojis.reportmsg} | Reporte:`, value: `${reporte}` },
-                { name: `${emojis.link} | Enlace:`, value: `${link}` },
-                { name: `${emojis.report_user} | ID del Reporte:`, value: `${reporteId}` }
-            )
-            .setImage(img.url)
-            .setColor(client.embedColor)
-            .setTimestamp()
-            .setFooter({ text: "Sistema de Reportes", iconURL: client.user.avatarURL() })
-
-
-        const staffChannel = await client.channels.fetch("931646202628436058");
-        await staffChannel.send({ embeds: [embedStaff] })
-
         await interaction.editReply({ content: `Reporte enviado correctamente, gracias. ID del reporte: ${reporteId}\n\nCuando sea revisado y evaluado, nos pondremos en contacto contigo.`, flags: [MessageFlags.Ephemeral] });
 
         try {
-            await interaction.user.send({ content: `Hola! Este es un mensaje automático para informarte que tu reporte con ID ${reporteId} ha sido recibido correctamente. Nuestro equipo de moderación revisará la información proporcionada y tomará las acciones necesarias. Te agradecemos por ayudarnos a mantener la comunidad segura y agradable para todos. Si tienes alguna pregunta adicional, no dudes en contactarnos a través del canal de reportes.` })
+            await interaction.user.send({ content: `¡Hola! Este es un mensaje automático.\n\nTu reporte con ID **${reporteId}** ha sido recibido correctamente. Nuestro equipo de moderación revisará la información proporcionada y tomará las acciones necesarias. Te agradecemos por ayudarnos a mantener la comunidad segura y agradable para todos.\n\nSi tienes alguna pregunta adicional, no dudes en contactarnos a través del canal de reportes.`})
         } catch (error) {
-            console.log(`No se pudo enviar el mensaje directo al usuario ${interaction.user.tag}. Posiblemente tenga los mensajes directos desactivados.`)
+            client.logger.log(`[reports] No se pudo enviar el mensaje directo al usuario ${interaction.user.tag}. Posiblemente tenga los mensajes directos desactivados.`, "error");
         }
     }
 

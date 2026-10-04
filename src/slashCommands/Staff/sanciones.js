@@ -2,9 +2,23 @@ const { ApplicationCommandOptionType, EmbedBuilder, ActionRowBuilder, StringSele
 const Reporte = require("../../schema/reports");
 const emojis = require("../../emojis.json");
 
+const ESTADO_EMOJI = {
+    Pendiente: emojis.reloj,
+    Aceptado: emojis.succes,
+    Denegado: emojis.error,
+    Resuelto: emojis.succes,
+};
+
+const ESTADO_COLOR = {
+    Pendiente: "Grey",
+    Aceptado: "Green",
+    Denegado: "Red",
+    Resuelto: "Blue",
+};
+
 module.exports = {
     name: "sanciones",
-    description: "Muestra la lista de reportes gestionados para ver sus detalles.",
+    description: "Muestra la lista de reportes registrados para ver sus detalles.",
     category: "Staff",
     usage: "/sanciones",
     userPrems: ["ManageMessages"],
@@ -12,12 +26,12 @@ module.exports = {
     run: async (client, interaction) => {
         await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
-        const reportes = await Reporte.find({ status: { $ne: "Pendiente" } })
+        const reportes = await Reporte.find({})
             .sort({ timestamp: -1 })
             .limit(25);
 
         if (reportes.length === 0) {
-            return interaction.editReply({ content: `${emojis.error} | No hay sanciones registradas en la base de datos.`, flags: [MessageFlags.Ephemeral] });
+            return interaction.editReply({ content: `${emojis.error} | No hay reportes registrados en la base de datos.`, flags: [MessageFlags.Ephemeral] });
         }
 
         const menu = new StringSelectMenuBuilder()
@@ -28,14 +42,14 @@ module.exports = {
                     label: `ID: ${rep.reportId}`,
                     description: `Usuario: ${rep.mcUser} | Estado: ${rep.status}`,
                     value: rep.reportId,
-                    emoji: rep.status === "Aceptado" ? emojis.succes : emojis.error
+                    emoji: ESTADO_EMOJI[rep.status] || emojis.error
                 }))
             );
 
         const row = new ActionRowBuilder().addComponents(menu);
 
         const embedPrincipal = new EmbedBuilder()
-            .setTitle("⚖️ | Historial de Sanciones - Lumecraft")
+            .setTitle("⚖️ | Historial de Reportes - Lumecraft")
             .setDescription("Selecciona un reporte del menú de abajo para ver la información completa, pruebas y staff responsable.")
             .setColor(client.embedColor)
             .setFooter({ text: `Mostrando los últimos ${reportes.length} registros.` });
@@ -58,16 +72,16 @@ module.exports = {
 
             const embedDetalle = new EmbedBuilder()
                 .setTitle(`📄 | Detalle del Reporte #${seleccionado.reportId}`)
-                .setColor(seleccionado.status === "Aceptado" ? "Green" : "Red")
+                .setColor(ESTADO_COLOR[seleccionado.status] || "Grey")
                 .addFields(
                     { name: `${emojis.user} | Usuario Minecraft:`, value: `\`${seleccionado.mcUser}\``, inline: true },
                     { name: `${emojis.razon} | Estado:`, value: seleccionado.status, inline: true },
                     { name: `${emojis.reportmsg} | Motivo del Reporte:`, value: seleccionado.reason },
-                    { name: `${emojis.moder} | Acción del Staff:`, value: seleccionado.staffAction },
+                    { name: `${emojis.moder} | Acción del Staff:`, value: seleccionado.staffAction || "Ninguna" },
                     { name: `${emojis.link} | Enlace de Prueba (Usuario):`, value: seleccionado.link || "Ninguno" },
-                    { name: `${emojis.reloj} | Fecha:`, value: `<t:${Math.floor(seleccionado.timestamp / 1000)}:R>`, inline: true }
+                    { name: `${emojis.reloj} | Fecha:`, value: `<t:${Math.floor(new Date(seleccionado.timestamp).getTime() / 1000)}:R>`, inline: true }
                 )
-                .setImage(seleccionado.evidence)
+                .setImage(seleccionado.evidence || null)
                 .setFooter({ text: `ID de base de datos: ${seleccionado._id}` });
 
             await i.update({ embeds: [embedDetalle] });

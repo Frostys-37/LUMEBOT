@@ -8,202 +8,204 @@ const {
   MessageFlags,
   PermissionsBitField,
 } = require("discord.js");
-const Discord = require("discord.js");
 const discordTranscripts = require("discord-html-transcripts");
 
 module.exports = {
   name: "interactionCreate",
   /**
-   *
    * @param {LUMEBOT} client
    * @param {CommandInteraction} interaction
    */
   run: async (client, interaction) => {
     if (!interaction.isButton()) return;
 
-    if (interaction.customId == `ticket`) {
+    if (interaction.customId === "ticket") {
       await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
-      let name = `ticket-${interaction.user.username}`;
-      let checkTickets = interaction.guild.channels.cache.find(
-        (c) => c.name == name.split(" ").join("-").toLocaleLowerCase(),
+      const name = `ticket-${interaction.user.username}`.toLowerCase().replace(/\s+/g, "-");
+      
+      const checkTickets = interaction.guild.channels.cache.find(
+        (c) => c.name === name || c.topic === interaction.user.id
       );
 
       if (checkTickets) {
         return interaction.editReply({
-          content:
-            "Ya tienes un ticket abierto... Si no es así, contacta con mi Developer.",
+          content: "Ya tienes un ticket abierto... Si no es así, contacta con un Administrador.",
           flags: [MessageFlags.Ephemeral],
         });
       }
 
-      function getChannelName(user) {
-        const user1 = `${user.username}`;
-      }
-
-      function hasTicket(g, interaction) {
-        let channelName = getChannelName(interaction.user);
-        let ticket = g.channels.cache.find((ch) => ch.name == channelName);
-      }
-
-      interaction.editReply({
-        content: "Tu ticket está en procesamiento, espera un momento...",
-        flags: [MessageFlags.Ephemeral],
-      });
-
-      if (hasTicket(interaction.guild, interaction)) return;
-
-      await interaction.guild.channels
-        .create({
-          name: `ticket-${interaction.user.username}`,
-          type: ChannelType.GuildText,
-          parent: "808447258609057823",
-          permissionOverwrites: [
-            {
-              id: interaction.guild.id,
-              deny: [PermissionsBitField.Flags.ViewChannel],
-            },
-            {
-              id: "740295855726133328",
-              allow: [
-                PermissionsBitField.Flags.ViewChannel,
-                PermissionsBitField.Flags.SendMessages,
-                PermissionsBitField.Flags.ReadMessageHistory,
-              ],
-            },
-            {
-              id: "740295965055123516",
-              allow: [
-                PermissionsBitField.Flags.ViewChannel,
-                PermissionsBitField.Flags.SendMessages,
-                PermissionsBitField.Flags.ReadMessageHistory,
-              ],
-            },
-            {
-              id: interaction.user.id,
-              allow: [
-                PermissionsBitField.Flags.ViewChannel,
-                PermissionsBitField.Flags.SendMessages,
-                PermissionsBitField.Flags.ReadMessageHistory,
-              ],
-            },
+      const staffOverwrites = (client.config.ticketStaffRoleIds || [])
+        .filter((roleId) => interaction.guild.roles.cache.has(roleId))
+        .map((roleId) => ({
+          id: roleId,
+          allow: [
+            PermissionsBitField.Flags.ViewChannel,
+            PermissionsBitField.Flags.SendMessages,
+            PermissionsBitField.Flags.ReadMessageHistory,
           ],
-          topic: `${interaction.user.id}`,
-        })
-        .then(async (channel) => {
-          channel = channel;
+        }));
 
-          await interaction.editReply({
-            content: `Tu ticket se ha creado, <#${channel.id}>`,
-            flags: [MessageFlags.Ephemeral],
+      const permissionOverwrites = [
+        {
+          id: interaction.guild.id,
+          deny: [PermissionsBitField.Flags.ViewChannel],
+        },
+        {
+          id: interaction.user.id,
+          allow: [
+            PermissionsBitField.Flags.ViewChannel,
+            PermissionsBitField.Flags.SendMessages,
+            PermissionsBitField.Flags.ReadMessageHistory,
+          ],
+        },
+        ...staffOverwrites,
+      ];
+
+      try {
+        const channel = await interaction.guild.channels.create({
+          name: name,
+          type: ChannelType.GuildText,
+          parent: client.config.ticketOpenCategoryId || null,
+          permissionOverwrites,
+          topic: interaction.user.id,
+        });
+
+        await interaction.editReply({
+          content: `Tu ticket se ha creado correctamente: <#${channel.id}>`,
+          flags: [MessageFlags.Ephemeral],
+        });
+
+        const botones = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId("close")
+            .setLabel("Cerrar Ticket")
+            .setEmoji("🔒")
+            .setStyle(ButtonStyle.Secondary),
+
+          new ButtonBuilder()
+            .setCustomId("reopen")
+            .setLabel("Reabrir Ticket")
+            .setEmoji("🔓")
+            .setStyle(ButtonStyle.Success),
+
+          new ButtonBuilder()
+            .setCustomId("delete")
+            .setLabel("Borrar Ticket")
+            .setEmoji("⛔")
+            .setStyle(ButtonStyle.Danger)
+        );
+
+        const embedTicket = new EmbedBuilder()
+          .setTitle("Soporte de Lumecraft | Tickets")
+          .setTimestamp()
+          .setDescription(
+            `Bienvenido a tu ticket ${interaction.user}.\n\nEn cuanto te atienda alguien del Staff descríbenos tu problema o duda.`
+          )
+          .setColor(client.embedColor || "Blurple")
+          .setFooter({
+            text: "Sistema de Tickets",
+            iconURL: client.user.avatarURL(),
           });
 
-          const botones = new ActionRowBuilder().addComponents(
-            new ButtonBuilder()
-              .setCustomId("close")
-              .setLabel("Cerrar Ticket")
-              .setEmoji("🔒")
-              .setStyle(ButtonStyle.Secondary),
-
-            new ButtonBuilder()
-              .setCustomId("reopen")
-              .setLabel("Reabrir Ticket")
-              .setEmoji("🔓")
-              .setStyle(ButtonStyle.Success),
-
-            new ButtonBuilder()
-              .setCustomId("delete")
-              .setLabel("Borrar Ticket")
-              .setEmoji("⛔")
-              .setStyle(ButtonStyle.Danger),
-          );
-
-          const embedTicket = new Discord.EmbedBuilder()
-            .setTitle("Soporte de Lumecraft | Tickets")
-            .setTimestamp()
-            .setDescription(
-              `Bienvenido a tu ticket ${interaction.user}.\n\nEn tanto te atiende alguien del Staff describenos tu problema o duda.`,
-            )
-            .setColor(client.embedColor)
-            .setFooter({
-              text: "Sistema de Tickets",
-              iconURL: client.user.avatarURL(),
-            });
-
-          channel.send({ components: [botones], embeds: [embedTicket] });
+        await channel.send({ components: [botones], embeds: [embedTicket] });
+      } catch (err) {
+        console.error("Error al crear canal de ticket:", err);
+        return interaction.editReply({
+          content: "Ocurrió un error al intentar crear el canal del ticket. Revisa los permisos e IDs de roles configurados.",
+          flags: [MessageFlags.Ephemeral],
         });
+      }
     }
 
     if (["close", "reopen", "delete"].includes(interaction.customId)) {
-      if (
-        !interaction.member.permissions.has(PermissionFlagsBits.ManageMessages)
-      ) {
+      if (!interaction.member.permissions.has(PermissionFlagsBits.ManageMessages)) {
         return interaction.reply({
-          content: "No tienes permisos.",
+          content: "No tienes permisos para realizar esta acción.",
           flags: [MessageFlags.Ephemeral],
         });
       }
 
-      if (interaction.customId == "close") {
+      const ch = interaction.channel;
+      if (!ch) return;
+
+      if (interaction.customId === "close") {
         await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
-        let ch = interaction.channel;
-        if (!ch) return;
+        const userId = ch.topic;
+        const member = userId ? await client.users.fetch(userId).catch(() => null) : null;
 
-        const member = await client.users.fetch(ch.topic);
-        await interaction.channel.setParent("847664236158517288");
+        if (client.config.ticketClosedCategoryId) {
+          await ch.setParent(client.config.ticketClosedCategoryId).catch(() => {});
+        }
 
-        await ch.permissionOverwrites.edit(member.id, { ViewChannel: false });
+        if (member) {
+          await ch.permissionOverwrites.edit(member.id, { ViewChannel: false }).catch(() => {});
+          await ch.setName(`close-${member.username}`).catch(() => {});
+        }
 
-        await ch.setName(`close-${member.username}`);
-        interaction.editReply({
-          content: "Ticket Cerrado",
+        return interaction.editReply({
+          content: "Ticket cerrado con éxito.",
           flags: [MessageFlags.Ephemeral],
         });
       }
 
-      if (interaction.customId == "reopen") {
+      if (interaction.customId === "reopen") {
         await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
-        let ch = interaction.channel;
-        if (!ch) return;
+        const userId = ch.topic;
+        const member = userId ? await client.users.fetch(userId).catch(() => null) : null;
 
-        const member = await client.users.fetch(ch.topic);
-        interaction.channel.setParent("808447258609057823");
+        if (client.config.ticketOpenCategoryId) {
+          await ch.setParent(client.config.ticketOpenCategoryId).catch(() => {});
+        }
 
-        await ch.setName(`reopen-${member.username}`);
-        await ch.permissionOverwrites.edit(interaction.user.id, {
-          ViewChannel: true,
-          SendMessages: true,
-        });
-        interaction.editReply({
-          content: "Ticket reabierto",
+        if (member) {
+          await ch.setName(`reopen-${member.username}`).catch(() => {});
+          await ch.permissionOverwrites.edit(member.id, {
+            ViewChannel: true,
+            SendMessages: true,
+          }).catch(() => {});
+        }
+
+        return interaction.editReply({
+          content: "Ticket reabierto con éxito.",
           flags: [MessageFlags.Ephemeral],
         });
       }
 
-      if (interaction.customId == "delete") {
+      if (interaction.customId === "delete") {
         await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
-        let ch = interaction.channel;
-        if (!ch) return;
+        const userId = ch.topic;
+        const member = userId ? await client.users.fetch(userId).catch(() => null) : null;
+        const nombreArchivo = member ? member.username : "usuario-desconocido";
 
-        const member = await client.users.fetch(ch.topic);
-        const attachment = await discordTranscripts.createTranscript(ch, {
-          returnType: "attachment",
-          fileName: `Transcript-${member.username}.html`,
-          minify: true,
-          saveImages: true,
-          useCDN: true,
-        });
-
-        client.channels.fetch("1074860381467578499")
-          .then((channel) => {
-            channel.send({ files: [attachment] });
+        try {
+          const attachment = await discordTranscripts.createTranscript(ch, {
+            returnType: "attachment",
+            fileName: `Transcript-${nombreArchivo}.html`,
+            minify: true,
+            saveImages: true,
+            useCDN: true,
           });
 
-          interaction.channel.delete();
+          const canalTranscripts = await client.channels
+            .fetch(client.config.ticketTranscriptChannelId)
+            .catch(() => null);
 
+          if (canalTranscripts) {
+            await canalTranscripts.send({ files: [attachment] });
+          } else {
+            console.warn(
+              "[Tickets] No se pudo enviar el transcript: TICKET_TRANSCRIPT_CHANNEL_ID inválido."
+            );
+          }
+        } catch (err) {
+          console.error("Error al generar el transcript:", err);
+        }
+
+        await ch.delete().catch(() => {});
       }
     }
   },

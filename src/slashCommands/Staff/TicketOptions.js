@@ -1,4 +1,4 @@
-const { ApplicationCommandOptionType, CommandInteraction, ButtonStyle, MessageFlags } = require("discord.js")
+const { ActionRowBuilder, CommandInteraction, ButtonStyle, MessageFlags, ButtonBuilder } = require("discord.js")
 const Discord = require("discord.js")
 const ms = require("ms")
 const emojis = require("../../emojis.json")
@@ -46,7 +46,7 @@ module.exports = {
               .setStyle(ButtonStyle.Danger),
           );
 
-            await interaction.reply({embeds: [embed], components: [botones], flags: [MessageFlags.Ephemeral]})
+            await interaction.editReply({embeds: [embed], components: [botones], flags: [MessageFlags.Ephemeral]})
 
         }
     }

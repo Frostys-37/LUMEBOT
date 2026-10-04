@@ -22,11 +22,7 @@ module.exports = {
         const sugerencia = interaction.options.getString("sugerencia");
         const userId = interaction.user.id;
         
-        const staffIds = [
-            "793926625765883955",
-            "535945446087065621",
-            "857874928534814720"
-        ];
+        const staffIds = client.config.staffBypassIds;
 
         const isOwner = interaction.guild.ownerId === userId;
         const isStaff = interaction.member.permissions.has(PermissionFlagsBits.ManageMessages);
@@ -54,8 +50,8 @@ module.exports = {
                 }
             }
 
-            const canalSugerencias = await client.channels.fetch("1504589471151161453"); 
-            if (!canalSugerencias) return interaction.editReply({ content: "Error: No se encontró el canal de sugerencias." });
+            const canalSugerencias = await client.channels.fetch(client.config.suggestionsChannelId);
+            if (!canalSugerencias) return interaction.editReply({ content: "No se encontró el canal de sugerencias." });
 
             const embedSugerencia = new EmbedBuilder()
             .setTitle("💡 | Nueva Sugerencia")
@@ -79,11 +75,11 @@ module.exports = {
             }
 
             await interaction.editReply({ 
-                content: bypassCooldown ? "Sugerencia enviada (Bypass de Staff activo)." : "Tu sugerencia ha sido enviada." 
+                content: bypassCooldown ? "Sugerencia enviada." : "Tu sugerencia ha sido enviada." 
             });
 
         } catch (error) {
-            console.error(error);
+            client.logger.log(`[sugerencia] Error al procesar la sugerencia: ${error}`, "error");
             await interaction.editReply({ content: "Hubo un error al procesar tu sugerencia." });
         }
     }

@@ -1,102 +1,86 @@
-const {
-    CommandInteraction,
-    InteractionType,
-    PermissionFlagsBits,
-    PermissionsBitField,
-    EmbedBuilder,
-    Message,
-    GuildMember,
-    DiscordAPIError,
-    DiscordjsRangeError,
-  } = require("discord.js");
-  const Discord = require("discord.js")
-  const LUMEBOT = require("../../structures/Client");
-  const emoji = require("../../emojis.json");
-  const Canvas = require("canvas");
-  const path = require("path");
+const { GuildMember } = require("discord.js");
+const Discord = require("discord.js");
+const LUMEBOT = require("../../structures/Client");
+const emoji = require("../../emojis.json");
+const Canvas = require("canvas");
+const path = require("path");
+const { generateWelcomeGif } = require("../../utils/welcomeImage");
 
-        const fontpath = path.join(__dirname, "../../assets/fonts/Roboto-Bold.ttf");
-        Canvas.registerFont(fontpath, { family: "RobotoCustom" });
-  
-  module.exports = {
-    name: "guildMemberAdd",
-    /**
-     * @param {LUMEBOT} client
-     * @param {GuildMember} member
-     */
-    run: async (client, member) => {
+const fontpath = path.join(__dirname, "../../assets/fonts/Roboto-Bold.ttf");
+Canvas.registerFont(fontpath, { family: "RobotoCustom" });
 
-        console.log(member + " Se unió")
-
-        const canvas = Canvas.createCanvas(922, 450);
-        const ctx = canvas.getContext("2d");
-
-        const backpath = path.join(__dirname, "../../assets/welcome_l.png");
-        const background = await Canvas.loadImage(backpath).catch((error) => {
-            console.error("Error al cargar la imagen de fondo:", error);
+module.exports = {
+  name: "guildMemberAdd",
+  /**
+   * @param {LUMEBOT} client
+   * @param {GuildMember} member
+   */
+  run: async (client, member) => {
+    try {
+      if (member.user.username.includes("loygameplays")) {
+        await member.ban({
+          reason: "Usuario baneado por pertenecer a blacklist de usuarios.",
         });
+        client.channels.cache
+          .get(client.config.reportStaffChannelId)
+          .send(
+            `El usuario ${member.user.tag} ha intentado entrar al servidor.`,
+          );
+        return;
+      }
+    } catch (error) {
+      client.logger.log(`[guildMemberAdd] Error al banear al usuario: ${error}`, "error");
+    }
 
-        const avatar = await Canvas.loadImage(member.user.displayAvatarURL({ extension: "png", size: 512 })).catch((error) => {
-            console.error("Error al cargar el avatar del usuario:", error);
-        });
+   // console.log(member + " Se unió");
 
-        ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-        ctx.save()
-		ctx.beginPath()
-		ctx.arc(461, 154, 116, 0, Math.PI * 2, true)
-		ctx.closePath()
-		ctx.clip()
-		ctx.drawImage(avatar, 345, 38, 232, 232)
-        ctx.restore()
-        
-        ctx.beginPath()
-        ctx.arc(461, 154, 116, 0, Math.PI * 2, true)
-        ctx.strokeStyle = "white"
-        ctx.lineWidth = 10
-        ctx.stroke();
-        ctx.closePath()
+    await member.roles.add(client.config.memberRoleId).catch((error) => {
+      client.logger.log(`[guildMemberAdd] Error al asignar rol de bienvenida: ${error}`, "error");
+    });
 
-        ctx.textAlign = "center";
-        ctx.fillStyle = "white";
+    const embed_servidor = new Discord.EmbedBuilder()
+      .setTitle(` ${emoji.user} | Nuevo Usuario en el Servidor!`)
+      .setDescription(
+        `Bienvenido a ${member.guild.name}\n\n¡Pasate por los canales de reglas y anuncios para enterarte de todo lo que pasa en el servidor!`,
+      )
+      .setFooter({
+        text: "Nuevo Usuario",
+        iconURL: member.user.displayAvatarURL({ dynamic: true }),
+      })
+      .setTimestamp(Date.now())
+      .setColor("Blurple");
 
-        ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
-        ctx.shadowBlur = 10;
-        ctx.shadowOffsetX = 4;
-        ctx.shadowOffsetY = 4;
+    const embed_md = new Discord.EmbedBuilder()
+      .setTitle(` ${emoji.user} | Bienvenido a ${member.guild.name}!`)
+      .setDescription(
+        `¡Hola ${member}, bienvenido a ${member.guild.name}! Estamos encantados de tenerte aquí.\nAsegúrate de revisar los canales de reglas y anuncios para mantenerte al tanto de todo lo que sucede en el servidor.\nSi tienes alguna duda no dudes en abrir un ticket (sigue las especificaciones para los tickets) o en consultar con alguien del Staff`,
+      )
+      .setFooter({
+        text: "mc.lumecraft.net",
+        iconURL: member.guild.iconURL({ dynamic: true }),
+      })
+      .setTimestamp(Date.now())
+      .setColor("Blurple");
 
-		ctx.font = "50px RobotoCustom"
-		ctx.fillText(`¡Bienvenido (a)`, 461, 324)
+      let files = [];
 
-		ctx.font = "30px RobotoCustom"
-		ctx.fillText(`${member.user.tag}`, 461, 360)
+    try {
+        const buffer = await generateWelcomeGif(member);
+        files = [new Discord.AttachmentBuilder(buffer, { name: "bienvenida.gif" })];
+        embed_servidor.setImage("attachment://bienvenida.gif");
+        embed_md.setImage("attachment://bienvenida.gif");
+    } catch (error) {
+        client.logger.log(`[guildMemberAdd] Error al generar el GIF de bienvenida: ${error}`, "error");
+    }
 
-		ctx.font = "30px RobotoCustom"
-		ctx.fillText(`a Lumecraft!`, 461, 392)
-
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
-
-        const attach = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: "bienvenida.png" });
-
-        const embed_servidor = new Discord.EmbedBuilder()
-        .setTitle(` ${emoji.user} | Nuevo Usuario en el Servidor!`)
-        .setDescription(`Bienvenido a ${member.guild.name}\n\n¡Pasate por los canales de reglas y anuncios para enterarte de todo lo que pasa en el servidor!`)
-        .setImage('attachment://bienvenida.png')
-        .setFooter({ text: "Nuevo Usuario", iconURL: member.user.displayAvatarURL({dynamic: true})})
-        .setTimestamp(Date.now())
-        .setColor("Blurple")
-
-        const embed_md = new Discord.EmbedBuilder()
-        .setTitle(` ${emoji.user} | Bienvenido a ${member.guild.name}!`)
-        .setDescription(`¡Hola ${member}, bienvenido a ${member.guild.name}! Estamos encantados de tenerte aquí.\nAsegúrate de revisar los canales de reglas y anuncios para mantenerte al tanto de todo lo que sucede en el servidor.\nSi tienes alguna duda no dudes en abrir un ticket (sigue las especificaciones para los tickets) o en consultar con alguien del Staff`)
-        .setImage('attachment://bienvenida.png')
-        .setFooter({ text: "mc.lumecraft.net", iconURL: member.guild.iconURL({dynamic: true})})
-        .setTimestamp(Date.now())
-        .setColor("Blurple")
-
-        client.channels.cache.get("739130797407207525").send({ content: `${member}`, embeds: [embed_servidor], files: [attach] })
-        member.user.send({ embeds: [embed_md] })
-        await member.roles.add("742524571118207088")
-    } 
-}
+    const channel = client.channels.cache.get(client.config.welcomeChannelId)
+    channel?.send({
+        content: `${member}`,
+        embeds: [embed_servidor],
+        files: files,
+      });
+    member.user.send({ embeds: [embed_md], files: files }).catch((error) => {
+        client.logger.log(`[guildMemberAdd] Error al enviar el mensaje privado: ${error}`, "error");
+    });
+  },
+};

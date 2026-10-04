@@ -54,7 +54,7 @@ module.exports = {
             }
 
         } catch (error) {
-            console.error("Error al consultar warns:", error);
+            client.logger.log(`[warnings] Error al consultar warns: ${error}`, "error");
             await interaction.editReply({ content: "Hubo un error al conectar con la base de datos." });
         }
     }
