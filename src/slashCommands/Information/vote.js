@@ -20,42 +20,42 @@ module.exports = {
       .setColor(client.embedColor || "Blue")
       .addFields(
         {
-          name: "🎮 TOPG",
-          value: "[¡Vota por Lumecraft!](https://topg.org/es/servidores-de-minecraft/server-685180)",
+          name: "?? TOPG",
+          value: "[�Vota por Lumecraft!](https://topg.org/es/servidores-de-minecraft/server-685180)",
           inline: false,
         },
         {
-          name: "🎮 Top Minecraft Servers",
-          value: "[¡Vota por Lumecraft!](https://topminecraftservers.org/vote/16515)",
+          name: "?? Top Minecraft Servers",
+          value: "[�Vota por Lumecraft!](https://topminecraftservers.org/vote/16515)",
           inline: false,
         },
         {
-          name: "🎮 Minecraft Server List",
-          value: "[¡Vota por Lumecraft!](https://minecraft-mp.com/server/362550/vote/)",
+          name: "?? Minecraft Server List",
+          value: "[�Vota por Lumecraft!](https://minecraft-mp.com/server/362550/vote/)",
           inline: false,
         },
         {
-          name: "🎮 Servidores de Minecraft",
-          value: "[¡Vota por Lumecraft!](https://servidoresdeminecraft.es/server/vote/DNPUDQ/mc.lumecraft.net)",
+          name: "?? Servidores de Minecraft",
+          value: "[�Vota por Lumecraft!](https://servidoresdeminecraft.es/server/vote/DNPUDQ/mc.lumecraft.net)",
           inline: false,
         },
         {
-          name: "🎮 MCSERV",
-          value: "[¡Vota por Lumecraft!](https://mcserv.org/es/vote/lumecraft)",
+          name: "?? MCSERV",
+          value: "[�Vota por Lumecraft!](https://mcserv.org/es/vote/lumecraft)",
           inline: false,
         },
         {
-          name: "🎮 40 Servidores",
-          value: "[¡Vota por Lumecraft!](https://www.40servidoresmc.es/lumecraft/votar)",
+          name: "?? 40 Servidores",
+          value: "[�Vota por Lumecraft!](https://www.40servidoresmc.es/lumecraft/votar)",
           inline: false,
         },
         {
-          name: "🎮 Planeta Minecraft",
-          value: "[¡Vota por Lumecraft!](https://www.planetminecraft.com/server/lumecraft-network/vote/)",
+          name: "?? Planeta Minecraft",
+          value: "[�Vota por Lumecraft!](https://www.planetminecraft.com/server/lumecraft-network/vote/)",
           inline: false,
         }
       )
-      .setFooter({ text: "¡Vota por Lumecraft!", iconURL: client.user.avatarURL() })
+      .setFooter({ text: "�Vota por Lumecraft!", iconURL: client.user.avatarURL() })
       .setTimestamp();
 
     const row1 = new ActionRowBuilder().addComponents(
