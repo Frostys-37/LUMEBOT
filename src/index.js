@@ -1,6 +1,8 @@
 const LUMEBOT = require("./structures/Client");
 const Discord = require("discord.js");
 const client = new LUMEBOT();
+const { customId, roles } = require("../src/utils/autoRoles");
+const emojis = require("../src/emojis.json");
 
 client.connect();
 
@@ -90,11 +92,38 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.update({ embeds: [editEmbed] });
     }
   }
+
+  if (interaction.isStringSelectMenu() && interaction.customId === customId) {
+    await interaction.deferReply({ flags: Discord.MessageFlags.Ephemeral });
+
+    const member = interaction.member;
+    const allowed = roles.map((r) => r.id);
+    const selected = interaction.values.filter((id) => allowed.includes(id));
+
+    const toAdd = selected.filter((id) => !member.roles.cache.has(id));
+    const toRemove = allowed.filter(
+      (id) => !selected.includes(id) && member.roles.cache.has(id),
+    );
+
+    try {
+      if (toAdd.length) await member.roles.add(toAdd);
+      if (toRemove.length) await member.roles.remove(toRemove);
+    } catch (err) {
+      console.error("[autorol] Error al actualizar roles:", err);
+      return interaction.editReply("No pude actualizar tus roles. Avisa a mi desarrollador: @frosty_god.");
+    }
+
+    const lines = [
+      ...toAdd.map((id) => `${emojis.success} Añadido: <@&${id}>`),
+      ...toRemove.map((id) => `${emojis.error} Quitado: <@&${id}>`),
+    ];
+    return interaction.editReply(lines.length ? lines.join("\n") : "No hubo cambios.");
+  }
+
 });
 
 client.once("clientReady", () => {
   const streamMonitor = require("./services/streamMonitor");
-  const { iniciarMonitorDeStreams } = require("./services/streamMonitor");
   const { iniciarMonitorDeServidores } = require("./services/serverMonitor/index");
   console.log("streamMonitor exporta:", streamMonitor); 
   streamMonitor.iniciarMonitorDeStreams(client);

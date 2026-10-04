@@ -1,4 +1,4 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require("discord.js");
 const emojis = require("../../emojis.json");
 const { obtenerEstadoDetallado } = require("../../services/serverMonitor/estado");
 
@@ -8,9 +8,7 @@ module.exports = {
   category: "Information",
 
   run: async (client, interaction) => {
-    const msg = await interaction.deferReply({
-          flags: [MessageFlags.fetchReply],
-        });
+    const msg = await interaction.deferReply();
 
     const modalidades = await obtenerEstadoDetallado(client);
 

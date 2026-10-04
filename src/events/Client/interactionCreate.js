@@ -6,6 +6,8 @@ const {
   MessageFlags
 } = require("discord.js");
 const LUMEBOT = require("../../structures/Client");
+const { customId, roles } = require("../../utils/autoRoles");
+const emojis = require("../../emojis.json");
 
 module.exports = {
   name: "interactionCreate",
@@ -58,5 +60,6 @@ module.exports = {
       }
     }
 
+    
     }
   }
