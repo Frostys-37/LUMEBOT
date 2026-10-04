@@ -116,6 +116,13 @@ async function verificarModalidades(client) {
   return resultados;
 }
 
+async function obtenerEstadoModalidades(client) {
+  const modalidades = client.config.mcMonitor?.modalidades || [];
+  if (!modalidades.length) return [];
+
+  return Promise.all(modalidades.map((m) => revisarModalidad(client, m)));
+}
+
 function iniciarMonitorDeServidores(client) {
   if (!client.config.mcMonitor?.alertChannelId || !client.config.mcMonitor?.modalidades?.length) {
     client.logger.log("[mcMonitor] Falta MC_MONITOR_ALERT_CHANNEL_ID o ninguna modalidad configurada: no se inició.", "warn");
@@ -129,4 +136,4 @@ function iniciarMonitorDeServidores(client) {
   client.logger.log(`[mcMonitor] Monitor de modalidades iniciado.`, "event");
 }
 
-module.exports = { iniciarMonitorDeServidores, verificarModalidades };
+module.exports = { iniciarMonitorDeServidores, verificarModalidades, obtenerEstadoModalidades };
