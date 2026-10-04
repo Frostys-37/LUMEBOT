@@ -6,12 +6,7 @@ let tokenExpiresAt = 0;
 async function obtenerToken(client) {
   if (cachedToken && Date.now() < tokenExpiresAt) return cachedToken;
 
-  const { clientId, clientSecret } = client.config.streams.twitch || {};
-  
-  if (!clientId || !clientSecret) {
-    throw new Error("[Twitch] Faltan clientId o clientSecret en la configuración.");
-  }
-
+  const { clientId, clientSecret } = client.config.streams.twitch;
   const res = await axios.post("https://id.twitch.tv/oauth2/token", null, {
     params: {
       client_id: clientId,
@@ -22,43 +17,32 @@ async function obtenerToken(client) {
 
   cachedToken = res.data.access_token;
   tokenExpiresAt = Date.now() + (res.data.expires_in - 60) * 1000;
-
   return cachedToken;
 }
 
 async function verificarTwitch(client) {
+  const { channels, clientId, clientSecret } = client.config.streams.twitch;
+  if (!channels.length || !clientId || !clientSecret) return [];
+
   try {
-    const { channels = [], clientId, clientSecret } = client.config?.streams?.twitch || {};
-
-    if (!channels.length || !clientId || !clientSecret) {
-      return [];
-    }
-
     const token = await obtenerToken(client);
     const params = new URLSearchParams();
-
-    channels.forEach((c) => {
-      params.append("user_login", c.toLowerCase().trim());
-    });
+    channels.forEach((c) => params.append("user_login", c));
 
     const res = await axios.get(`https://api.twitch.tv/helix/streams?${params.toString()}`, {
-      headers: {
-        "Client-Id": clientId,
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Client-Id": clientId, Authorization: `Bearer ${token}` },
     });
 
-    return (res.data.data || []).map((s) => ({
-      platform: "twitch", 
+    return res.data.data.map((s) => ({
+      platform: "twitch",
       channel: s.user_login,
-      channelName: s.user_name,
-      streamId: s.id, 
+      streamId: s.id,
       title: s.title,
-      thumbnail: s.thumbnail_url ? s.thumbnail_url.replace("{width}", "640").replace("{height}", "360") : null,
+      thumbnail: s.thumbnail_url.replace("{width}", "640").replace("{height}", "360"),
       url: `https://twitch.tv/${s.user_login}`,
     }));
   } catch (err) {
-    console.error("[streams] Error en verificarTwitch:", err.response?.data || err.message);
+    client.logger.log(`[streams] Error en verificarTwitch: ${JSON.stringify(err.response?.data) || err.message}`, "error");
     return [];
   }
 }

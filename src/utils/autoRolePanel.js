@@ -6,7 +6,7 @@ const {
 const { customId, roles } = require("./autoRoles");
 const emojis = require("../emojis.json");
 
-function buildAutoRolePanel() {
+function validarRoles() {
   const ids = roles.map((r) => r.id);
   if (ids.some((id) => !id) || new Set(ids).size !== ids.length) {
     throw new Error(`[autorol] IDs de rol faltantes o repetidos en autoRoles.js: ${JSON.stringify(ids)}`);
@@ -14,6 +14,7 @@ function buildAutoRolePanel() {
 }
 
 function buildAutoRolePanel() {
+  validarRoles();
   const embed = new EmbedBuilder()
     .setTitle(`${emojis.bot} Panel de AutoRoles`)
     .setDescription(

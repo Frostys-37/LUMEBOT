@@ -19,7 +19,7 @@ process.on("uncaughtExceptionMonitor", (err, origin) => {
 });
 
 client.on("interactionCreate", async (interaction) => {
-  if (!interaction.isStringSelectMenu());
+  if (!interaction.isStringSelectMenu()) return;
   let _commands;
   let editEmbed = new Discord.EmbedBuilder();
 
@@ -125,7 +125,7 @@ client.on("interactionCreate", async (interaction) => {
 client.once("clientReady", () => {
   const streamMonitor = require("./services/streamMonitor");
   const { iniciarMonitorDeServidores } = require("./services/serverMonitor/index");
-  console.log("streamMonitor exporta:", streamMonitor); 
+  client.logger.log(`[streams] streamMonitor exporta: ${Object.keys(streamMonitor)}`, "event");
   streamMonitor.iniciarMonitorDeStreams(client);
   iniciarMonitorDeServidores(client);
 

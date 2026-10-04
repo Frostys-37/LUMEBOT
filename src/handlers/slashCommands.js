@@ -40,7 +40,6 @@ module.exports = (client) => {
     }
   });
   client.logger.log(`SlashCommands cargados (/): ${count}`, "cmd");
-  console.log('CLIENT_ID en uso:', client.config.clientID);
   const rest = new REST({ version: "10" }).setToken(client.config.token);
   (async () => {
     try {

@@ -96,7 +96,7 @@ module.exports = {
         try {
             await interaction.user.send({ content: `¡Hola! Este es un mensaje automático.\n\nTu reporte con ID **${reporteId}** ha sido recibido correctamente. Nuestro equipo de moderación revisará la información proporcionada y tomará las acciones necesarias. Te agradecemos por ayudarnos a mantener la comunidad segura y agradable para todos.\n\nSi tienes alguna pregunta adicional, no dudes en contactarnos a través del canal de reportes.`})
         } catch (error) {
-            console.log(`No se pudo enviar el mensaje directo al usuario ${interaction.user.tag}. Posiblemente tenga los mensajes directos desactivados.`)
+            client.logger.log(`[reports] No se pudo enviar el mensaje directo al usuario ${interaction.user.tag}. Posiblemente tenga los mensajes directos desactivados.`, "error");
         }
     }
 

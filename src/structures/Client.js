@@ -42,7 +42,7 @@ class LUMEBOT extends Client {
 
     this.slashCommands = new Collection();
     this.config = require("../config.js");
-    this.devID = this.config.devID;
+    this.devID = this.config.ownerID;
     this.prefix = this.config.prefix;
     this.embedColor = this.config.embedColor;
     this.aliases = new Collection();

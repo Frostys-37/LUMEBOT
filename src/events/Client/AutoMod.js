@@ -25,5 +25,7 @@ module.exports = {
             message.delete()
             message.guild.members.kick(message.author.id, {reason: "Expulsado por AutoMod (invitaciones)"})
         }
+
+        message.guild.channels.cache.get(client.config.modLogChannelId).send({ content: `${emojis.warn} | ${message.author} ha sido expulsado por enviar un enlace de invitación de Discord.` }).catch(() => { });
     }
 }

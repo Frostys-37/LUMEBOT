@@ -42,7 +42,7 @@ async function verificarYoutube(client) {
       const resultado = await obtenerUltimoVideo(client, channelId);
       if (resultado) resultados.push(resultado);
     } catch (err) {
-      console.warn(`[streams] Error consultando YouTube para "${channelId}":`, err.message);
+      client.logger.log(`[streams] Error consultando YouTube para "${channelId}": ${err.message}`, "warn");
     }
   }
   return resultados;

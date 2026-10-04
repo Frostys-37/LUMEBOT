@@ -22,14 +22,14 @@ async function anunciar(client, stream) {
     .setFooter({ text: NOMBRES[stream.platform] })
     .setTimestamp();
 
-    let emj = "";
-    if (NOMBRES[stream.platform] === NOMBRES.youtube) {
-        emj = "<:youtube:959908410646736926>";
-    } else if (NOMBRES[stream.platform] === NOMBRES.twitch) {
-        emj = "<:Twitchlogo:1552014131270516808>";
-    } else if (NOMBRES[stream.platform] === NOMBRES.kick) {
-        emj = "<:Kick:1552014458648268870>";
-    }
+  let emj = "";
+  if (NOMBRES[stream.platform] === NOMBRES.youtube) {
+    emj = "<:youtube:959908410646736926>";
+  } else if (NOMBRES[stream.platform] === NOMBRES.twitch) {
+    emj = "<:Twitchlogo:1552014131270516808>";
+  } else if (NOMBRES[stream.platform] === NOMBRES.kick) {
+    emj = "<:Kick:1552014458648268870>";
+  }
 
   await canalAnuncio.send({
     content: `${emj || "📢"} ¡**${stream.channelName || stream.channel}** está en vivo en ${NOMBRES[stream.platform]}! ${stream.url}`,
@@ -45,7 +45,7 @@ async function procesarCanal(client, canal, activos) {
   const estado = await StreamState.findOneAndUpdate(
     { platform: canal.platform, channel: canal.channel.toLowerCase() },
     {},
-    { upsert: true, returnDocument: 'after' } 
+    { upsert: true, returnDocument: 'after' }
   );
 
   if (encontrado) {
@@ -79,7 +79,7 @@ async function verificarKickConCircuitBreaker(client) {
     if (kickFallosSeguidos >= 3) {
       const pausaMs = 15 * 60 * 1000;
       kickPausadoHasta = Date.now() + pausaMs;
-      console.warn(`[streams] Kick falló ${kickFallosSeguidos} veces seguidas -- se pausa por 15 minutos.`);
+      client.logger.log(`[streams] Kick falló ${kickFallosSeguidos} veces seguidas -- se pausa por 15 minutos.`, "warn");
     }
     return [];
   }
@@ -98,11 +98,6 @@ async function verificarTodo(client) {
       verificarKickConCircuitBreaker(client),
     ]);
 
-    /*
-    console.log("Twitch live:", twitchLive);
-    console.log("YouTube live:", youtubeLive);
-    console.log("Kick live:", kickLive);
-    */
     const todosLosCanales = [
       ...(twitchCfg.channels || []).map((c) => ({ platform: "twitch", channel: c })),
       ...(youtubeCfg.channelIds || []).map((c) => ({ platform: "youtube", channel: c })),
@@ -115,13 +110,13 @@ async function verificarTodo(client) {
       await procesarCanal(client, canal, activos);
     }
   } catch (err) {
-    console.error("[streams] Error en el chequeo de streams:", err);
+    client.logger.log(`[streams] Error en el chequeo de streams: ${err.stack || err}`, "error");
   }
 }
 
 function iniciarMonitorDeStreams(client) {
   if (!client.config.streams?.announceChannelId) {
-    console.warn("[streams] STREAM_ANNOUNCE_CHANNEL_ID no configurado: El monitor de streams no se inició.");
+    client.logger.log("[streams] STREAM_ANNOUNCE_CHANNEL_ID no configurado: El monitor de streams no se inició.", "warn");
     return;
   }
 
@@ -129,7 +124,7 @@ function iniciarMonitorDeStreams(client) {
 
   verificarTodo(client);
   setInterval(() => verificarTodo(client), intervalo);
-  console.log(`[streams] Monitor de streams iniciado.`);
+  client.logger.log(`[streams] Monitor de streams iniciado.`, "event");
 }
 
-module.exports = { iniciarMonitorDeStreams, verificarTodo };
+module.exports = { iniciarMonitorDeStreams };

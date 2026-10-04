@@ -34,7 +34,9 @@ module.exports = {
 
     console.log(member + " Se unió");
 
-    await member.roles.add("1556093760901873664");
+    await member.roles.add("1556093760901873664").catch((error) => {
+      console.error("Error al asignar rol de bienvenida:", error);
+    });
 
     const embed_servidor = new Discord.EmbedBuilder()
       .setTitle(` ${emoji.user} | Nuevo Usuario en el Servidor!`)

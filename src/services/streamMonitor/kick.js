@@ -8,7 +8,6 @@ async function verificarKick(client) {
 
   for (const canal of channels) {
     try {
-
       const res = await axios.get(`https://kick.com/api/v2/channels/${canal}`, {
         headers: { "User-Agent": "Mozilla/5.0" },
       });
@@ -25,7 +24,7 @@ async function verificarKick(client) {
         });
       }
     } catch (err) {
-      console.warn(`[streams] Error consultando Kick para "${canal}":`, err.message);
+      client.logger.log(`[streams] Error consultando Kick para "${canal}": ${err.message}`, "warn");
     }
   }
 

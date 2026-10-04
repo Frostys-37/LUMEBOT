@@ -104,7 +104,7 @@ async function verificarModalidades(client) {
 
   const canal = await client.channels.fetch(client.config.mcMonitor.alertChannelId).catch(() => null);
   if (!canal) {
-    console.warn("[mcMonitor] No se pudo encontrar el canal configurado en MC_MONITOR_ALERT_CHANNEL_ID.");
+    client.logger.log("[mcMonitor] No se pudo encontrar el canal configurado en MC_MONITOR_ALERT_CHANNEL_ID.", "warn");
     return [];
   }
 
@@ -118,7 +118,7 @@ async function verificarModalidades(client) {
 
 function iniciarMonitorDeServidores(client) {
   if (!client.config.mcMonitor?.alertChannelId || !client.config.mcMonitor?.modalidades?.length) {
-    console.warn("[mcMonitor] Falta MC_MONITOR_ALERT_CHANNEL_ID o ninguna modalidad configurada: no se inició.");
+    client.logger.log("[mcMonitor] Falta MC_MONITOR_ALERT_CHANNEL_ID o ninguna modalidad configurada: no se inició.", "warn");
     return;
   }
 
@@ -126,7 +126,7 @@ function iniciarMonitorDeServidores(client) {
 
   verificarModalidades(client);
   setInterval(() => verificarModalidades(client), intervalo);
-  console.log(`[mcMonitor] Monitor de modalidades iniciado (cada ${intervalo / 1000}s).`);
+  client.logger.log(`[mcMonitor] Monitor de modalidades iniciado.`, "event");
 }
 
 module.exports = { iniciarMonitorDeServidores, verificarModalidades };

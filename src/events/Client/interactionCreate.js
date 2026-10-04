@@ -23,7 +23,7 @@ module.exports = {
             try {
                 await command.autocomplete(client, interaction);
             } catch (error) {
-                console.error("Error en Autocomplete:", error);
+                client.logger.log(`[commands] Error en Autocomplete: ${error.message}`, "error");
             }
         }
         return; 
@@ -32,7 +32,7 @@ module.exports = {
     if (interaction.type === InteractionType.ApplicationCommand) {
       const command = client.slashCommands.get(interaction.commandName);
       
-      if (!command) return console.log(`Comando no encontrado: ${interaction.commandName}`);
+      if (!command) return client.logger.log(`[commands] Comando no encontrado: ${interaction.commandName}`);
 
       const embed = new EmbedBuilder().setColor("Red");
 
@@ -54,7 +54,7 @@ module.exports = {
       try {
         await command.run(client, interaction);
       } catch (error) {
-        console.error("Error al ejecutar comando:", error);
+        client.logger.log(`[commands] Error al ejecutar comando: ${error.message}`, "error");
         const errorMsg = { content: `Ha ocurrido un error desconocido al ejecutar el comando.`, flags: [MessageFlags.Ephemeral] };
         interaction.replied || interaction.deferred ? await interaction.editReply(errorMsg) : await interaction.reply(errorMsg);
       }
