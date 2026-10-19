@@ -96,6 +96,9 @@ client.on("interactionCreate", async (interaction) => {
   if (interaction.isStringSelectMenu() && interaction.customId === customId) {
     await interaction.deferReply({ flags: Discord.MessageFlags.Ephemeral });
 
+    console.log("[autorol] values:", interaction.values);
+console.log("[autorol] allowed:", roles.map((r) => r.id));
+
     const member = interaction.member;
     const allowed = roles.map((r) => r.id);
     const selected = interaction.values.filter((id) => allowed.includes(id));

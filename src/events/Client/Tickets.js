@@ -25,7 +25,10 @@ module.exports = {
       const name = `ticket-${interaction.user.username}`.toLowerCase().replace(/\s+/g, "-");
       
       const checkTickets = interaction.guild.channels.cache.find(
-        (c) => c.name === name || c.topic === interaction.user.id
+        (c) => 
+          c.type === ChannelType.GuildText &&
+          c.parentId === client.config.ticketOpenCategoryId && 
+          c.topic === interaction.user.id
       );
 
       if (checkTickets) {
@@ -155,6 +158,20 @@ module.exports = {
 
         const userId = ch.topic;
         const member = userId ? await client.users.fetch(userId).catch(() => null) : null;
+
+        const checkTickets = interaction.guild.channels.cache.find(
+        (c) => 
+          c.type === ChannelType.GuildText &&
+          c.parentId === client.config.ticketOpenCategoryId && 
+          c.topic === interaction.user.id
+      );
+
+      if (checkTickets) {
+        return interaction.editReply({
+          content: "Ya tienes un ticket abierto... Si no es así, contacta con un Administrador.",
+          flags: [MessageFlags.Ephemeral],
+        });
+      }
 
         if (client.config.ticketOpenCategoryId) {
           await ch.setParent(client.config.ticketOpenCategoryId).catch(() => {});

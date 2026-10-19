@@ -67,6 +67,20 @@ class LUMEBOT extends Client {
 
     mongoose.connect(dburl).then(() => {
       this.logger.log("[DB] DB CONECTADA", "ready");
+      const mongoClient = mongoose.connection.getClient();
+
+    mongoClient.on("serverHeartbeatFailed", (event) => {
+      this.logger.log("[DB] Falló la comprobación de conexión", "error", {
+    fecha: new Date().toISOString(),
+    pid: process.pid,
+    uptimeSegundos: Math.round(process.uptime()),
+    servidor: event.connectionId,
+    duracionMs: event.duration,
+    error: event.failure?.name,
+    mensaje: event.failure?.message,
+    causa: event.failure?.cause?.message,
+  });
+});
     }).catch((err) => {
       this.logger.log(`Error de conexión: \n ${err.stack}`, "error");
     });
