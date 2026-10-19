@@ -35,7 +35,7 @@ module.exports = {
       .setTitle(`${emojis.user || "ℹ️"} | Panel de Información Lumecraft`)
       .setThumbnail(client.user.displayAvatarURL())
       .setColor(client.embedColor || "Blue")
-      .setDescription(`Conéctate en \`mc.lumecraft.net\``)
+      .setDescription(`Conéctate en [mc.lumecraft.net](https://links.lumecraft.net/)`)
       .addFields(
         { name: "🎮 Modalidades", value: lineasModalidades, inline: false },
         { name: `${emojis.ping || "🤖"} Latencia Bot`, value: `**Bot:** \`${ping}ms\`\n**API:** \`${apiPing}ms\``, inline: true },
@@ -46,7 +46,14 @@ module.exports = {
       .setTimestamp();
 
     const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setLabel("Tienda").setStyle(ButtonStyle.Link).setURL("https://tienda.lumecraft.net/"),
+      new ButtonBuilder()
+      .setLabel("Tienda")
+      .setStyle(ButtonStyle.Link)
+      .setURL("https://tienda.lumecraft.net/"),
+      new ButtonBuilder()
+      .setLabel("Página Web")
+      .setStyle(ButtonStyle.Link)
+      .setURL("https://links.lumecraft.net/")
     );
 
     await interaction.editReply({

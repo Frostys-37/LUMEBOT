@@ -52,6 +52,8 @@
   "allowScripts": {
     "canvas@3.2.3": true,
     "@google/genai@2.27.0": true,
-    "groq-sdk@1.6.0": true
+    "groq-sdk@1.6.0": true,
+    "canvacord@5.4.10": true,
+    "protobufjs@7.6.6": true
   }
 }
