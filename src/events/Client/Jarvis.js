@@ -1,6 +1,7 @@
 const Groq = require("groq-sdk");
 const fs = require("fs");
 const path = require("path");
+const { responderJarvis } = require("../../services/jarvisWebhook");
 
 const { obtenerEstadoModalidades } = require("../../services/serverMonitor");
 
@@ -12,11 +13,7 @@ if (process.env.GROQ_API_KEY) {
   });
 }
 
-/*
-|--------------------------------------------------------------------------
-| PROMPT DE J.A.R.V.I.S.
-|--------------------------------------------------------------------------
-*/
+
 
 const JARVIS_PROMPT_PATH = path.join(__dirname, "../../prompts/jarvis.md");
 
@@ -30,12 +27,6 @@ try {
     error,
   );
 }
-
-/*
-|--------------------------------------------------------------------------
-| DETECCIÓN DE CONSULTAS SOBRE EL ESTADO DEL SERVIDOR
-|--------------------------------------------------------------------------
-*/
 
 function necesitaEstadoDelServidor(prompt) {
   const texto = prompt.toLowerCase();
@@ -64,12 +55,6 @@ function necesitaEstadoDelServidor(prompt) {
 
   return palabrasClave.some((palabra) => texto.includes(palabra));
 }
-
-/*
-|--------------------------------------------------------------------------
-| CONSTRUIR CONTEXTO DEL ESTADO DEL SERVIDOR
-|--------------------------------------------------------------------------
-*/
 
 function construirContextoServidor(resultados) {
   if (!resultados?.length) {
@@ -103,18 +88,11 @@ ${lineas.join("\n")}
 `;
 }
 
-/*
-|--------------------------------------------------------------------------
-| EVENTO
-|--------------------------------------------------------------------------
-*/
-
 module.exports = {
   name: "messageCreate",
 
   run: async (client, message) => {
-    // Ignorar bots y mensajes fuera de servidores
-    if (message.author.bot || !message.guild) return;
+    if (message.author.bot || message.webhookId || !message.guild) return;
 
     const contenido = message.content.trim();
     const contenidoMinusculas = contenido.toLowerCase();
@@ -124,44 +102,21 @@ module.exports = {
 
     const promptUsuario = contenido.replace(/^jarvis[,.]?\s*/i, "").trim();
 
-    /*
-        |--------------------------------------------------------------------------
-        | LLAMADA SIN PETICIÓN
-        |--------------------------------------------------------------------------
-        */
-
     if (!promptUsuario) {
-      return message.reply(
-        "`J.A.R.V.I.S.:` A su disposición, señor. ¿En qué puedo asistirlo?",
+      return responderJarvis(client, message,
+        "A su disposición, señor. ¿En qué puedo asistirlo?",
       );
     }
-
-    /*
-        |--------------------------------------------------------------------------
-        | GROQ NO CONFIGURADO
-        |--------------------------------------------------------------------------
-        */
 
     if (!groq) {
-      return message.reply(
-        "`J.A.R.V.I.S.:` Mi conexión con el núcleo de procesamiento no está disponible.",
+      return responderJarvis(client, message,
+        "Mi conexión con el núcleo de procesamiento no está disponible.",
       );
     }
-
-    /*
-        |--------------------------------------------------------------------------
-        | TYPING
-        |--------------------------------------------------------------------------
-        */
 
     await message.channel.sendTyping();
 
     try {
-      /*
-            |--------------------------------------------------------------------------
-            | OBTENER ESTADO DEL SERVIDOR SI ES NECESARIO
-            |--------------------------------------------------------------------------
-            */
 
       let contextoServidor = "";
 
@@ -171,12 +126,6 @@ module.exports = {
         contextoServidor = construirContextoServidor(resultados);
       }
 
-      /*
-            |--------------------------------------------------------------------------
-            | CONTEXTO PARA GROQ
-            |--------------------------------------------------------------------------
-            */
-
       const mensajeUsuario = `
 Usuario: ${message.author.username}
 
@@ -185,12 +134,6 @@ ${contextoServidor}
 Solicitud del usuario:
 "${promptUsuario}"
 `;
-
-      /*
-            |--------------------------------------------------------------------------
-            | GROQ
-            |--------------------------------------------------------------------------
-            */
 
       const chatCompletion = await groq.chat.completions.create({
         messages: [
@@ -210,32 +153,26 @@ Solicitud del usuario:
 
         temperature: 0.7,
 
-        max_tokens: 200,
+        max_tokens: 500,
 
         include_reasoning: false,
       });
-
-      /*
-            |--------------------------------------------------------------------------
-            | RESPUESTA
-            |--------------------------------------------------------------------------
-            */
 
       const textoRespuesta =
         chatCompletion.choices[0]?.message?.content?.trim();
 
       if (!textoRespuesta) {
-        return message.reply(
-          "`J.A.R.V.I.S.:` Procesamiento completado. No obtuve una respuesta útil.",
+        return responderJarvis(client, message,
+          "Procesamiento completado. No obtuve una respuesta útil.",
         );
       }
 
-      await message.reply(`\`J.A.R.V.I.S.:\` ${textoRespuesta}`);
+      await responderJarvis(client, message, textoRespuesta);
     } catch (error) {
       console.error("[J.A.R.V.I.S.] Error:", error);
 
-      await message.reply(
-        "`J.A.R.V.I.S.:` Parece que algo ha decidido complicar innecesariamente las cosas.",
+      await responderJarvis(client, message,
+        "Parece que algo ha decidido complicar innecesariamente las cosas.",
       );
     }
   },
