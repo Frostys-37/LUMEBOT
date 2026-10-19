@@ -17,7 +17,7 @@ if (process.env.GROQ_API_KEY) {
 
 const JARVIS_PROMPT_PATH = path.join(__dirname, "../../prompts/jarvis.md");
 
-let JARVIS_SYSTEM_INSTRUCTION = "";
+let JARVIS_SYSTEM_INSTRUCTION = "Eres J.A.R.V.I.S., un compañero de conversación de Lumecraft. Responde en español, con cortesía e ironía sutil, en una a tres frases. No generes código, tutoriales ni planes de trabajo. No inventes datos del servidor ni acciones realizadas.";
 
 try {
   JARVIS_SYSTEM_INSTRUCTION = fs.readFileSync(JARVIS_PROMPT_PATH, "utf8");
@@ -131,7 +131,7 @@ Usuario: ${message.author.username}
 
 ${contextoServidor}
 
-Solicitud del usuario:
+Mensaje en la conversación de Discord:
 "${promptUsuario}"
 `;
 
