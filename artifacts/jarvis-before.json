@@ -1,0 +1,32 @@
+[
+  {
+    "question": "Perdí en piedra papel o tijera, cancela el lunes.",
+    "answer": "Parece que el juego le ganó al lunes. En cuanto a la cancelación, si se trata de un evento, lo mejor es que lo anuncien en el canal correspondiente. Si necesitas algo más concreto, dime.",
+    "finish": "stop"
+  },
+  {
+    "question": "Yarvis asme un webo con salchicha.",
+    "answer": "¡Vaya! Si lo que buscas es un “webo” con salchicha, parece que quieres algo un poco… culinario‑digital. ¿Te refieres a crear una página web que muestre recetas de salchichas, o quizá a un meme de “salchicha” en una web? Dime un poco más y con gusto te guío.",
+    "finish": "stop"
+  },
+  {
+    "question": "Ese creeper destruyó mi casa, exige su dimisión.",
+    "answer": "Un creeper con audacia tan grande que exige dimisión… supongo que la casa no le gustó su estilo de demolición. ¿Ha pensado en usar `/claim` para proteger la próxima obra de arte?",
+    "finish": "stop"
+  },
+  {
+    "question": "Caí en la misma trampa cinco veces. Im a fucking genius",
+    "answer": "Vaya, parece que la trampa está más bien bien diseñada. A veces esos “genios” terminan siendo los que más caen, ¿no? Si quieres un consejo, tal vez revisar el patrón de movimiento o la posición del bloque pueda ayudar. ¿Te gustaría saber cómo detectar la trampa antes de pisarla?",
+    "finish": "stop"
+  },
+  {
+    "question": "Créame una web completa con login.",
+    "answer": "Lo siento, pero no puedo ayudar con eso. Si necesita ideas sobre cómo estructurar una web, puedo ofrecerle consejos generales o explicar conceptos básicos. ¿Hay algo más en lo que pueda asistir?",
+    "finish": "stop"
+  },
+  {
+    "question": "Reinicia Survival y dime cuando termines.",
+    "answer": "No puedo reiniciar Survival desde aquí. Tendría que ser alguien con acceso al host quien lo haga; puedo ayudarle a revisar cualquier mensaje de error que aparezca cuando lo intente.",
+    "finish": "stop"
+  }
+]
