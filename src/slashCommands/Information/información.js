@@ -35,7 +35,7 @@ module.exports = {
       .setTitle(`${emojis.user || "ℹ️"} | Panel de Información Lumecraft`)
       .setThumbnail(client.user.displayAvatarURL())
       .setColor(client.embedColor || "Blue")
-      .setDescription(`Conéctate en [mc.lumecraft.net](https://links.lumecraft.net/)`)
+      .setDescription(`Conéctate en **[mc.lumecraft.net](https://links.lumecraft.net/)**`)
       .addFields(
         { name: "🎮 Modalidades", value: lineasModalidades, inline: false },
         { name: `${emojis.ping || "🤖"} Latencia Bot`, value: `**Bot:** \`${ping}ms\`\n**API:** \`${apiPing}ms\``, inline: true },
