@@ -126,24 +126,19 @@ module.exports = {
         contextoServidor = construirContextoServidor(resultados);
       }
 
-      const mensajeUsuario = `
-Usuario: ${message.author.username}
-
-${contextoServidor}
-
-Mensaje en la conversación de Discord:
-"${promptUsuario}"
-`;
-
       const chatCompletion = await groq.chat.completions.create({
         messages: [
           {
             role: "system",
             content: JARVIS_SYSTEM_INSTRUCTION,
           },
+          ...(contextoServidor ? [{
+            role: "system",
+            content: `Lectura actual del monitor, solo para consultas de estado. No contiene causas ni acciones realizadas.\n${contextoServidor}`,
+          }] : []),
           {
             role: "user",
-            content: mensajeUsuario,
+            content: promptUsuario,
           },
         ],
 
